@@ -1,0 +1,16 @@
+{
+    "vue-format.js-beautify": {
+        "indent_size": "4",
+        "indent_char": " ",
+        "indent_with_tabs": false,
+        "brace-style": "expand",
+        "space_after_anon_function": true,
+        "css": {},
+        "js": {},
+        "html": {
+            "force_format": [
+                "template"
+            ]
+        }
+    }
+}
