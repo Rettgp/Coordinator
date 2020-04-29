@@ -13,7 +13,7 @@ stages:
 publish:
   stage: deploy
   only: 
-    - $Tag
+    - master
   when: manual
   script:
     - npm run build
