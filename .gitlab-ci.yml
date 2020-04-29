@@ -24,4 +24,4 @@ publish:
     - url=$(echo $content | awk '{print $8}' FS='"')
     - echo ${url}
     - absolute_url=${CI_PROJECT_URL}${url}
-    - curl --request POST --header 'Content-Type:application/json' --header "Private-Token:MAzPbYT-xgaUgx2Nc4di" --data '{"name":"Version $CI_COMMIT_REF_NAME", "tag_name":"$CI_COMMIT_REF_NAME", "ref":"$CI_COMMIT_REF_NAME", "description":"# v$CI_COMMIT_TAG${newline}### Downloads${newline} [${filename}](${absolute_url})${newline}"}' "https://gitlab.com/api/v4/projects/18471086/releases"
+    - curl --request POST --header 'Content-Type:application/json' --header "Private-Token:MAzPbYT-xgaUgx2Nc4di" --data '{"name":"Version $CI_COMMIT_REF_NAME", "tag_name":"$CI_COMMIT_REF_NAME", "ref":"$CI_COMMIT_REF_NAME", "description":"Release $CI_COMMIT_REF_NAME", "assets":{ "links":[{ "name":"${filename}", "url":"${absolute_url}" }] }}' "https://gitlab.com/api/v4/projects/18471086/releases"
