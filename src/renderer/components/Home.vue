@@ -289,6 +289,18 @@ export default
                         }
                         break;
                     }
+                    case "einherjar":
+                    {
+                        if (data_words.length === 2)
+                        {
+                            this.$refs.LogComponent.Log(`Einherjar Chamber Selected: ${data_words[1]}`);
+                            for (let i = 0; i < this.characters_to_run.length; ++i)
+                            {
+                                this.characters_to_run[i].socket.write(`local_event,${data_words[1]}\n`);
+                            }
+                        }
+                        break;
+                    }
                     default:
                     {
                         this.$refs.LogComponent.Log(`${current_procedure.name}: Local Event - Unhandled ${data_string}`);
