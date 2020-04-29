@@ -5,7 +5,7 @@ cache:
     - node_modules/
 
 before_script:
-  - sudo apt install jq
+  - apk update && apk add jq
   - npm install -g n
   - n 10.16.3
   - npm install
