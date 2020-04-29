@@ -18,5 +18,9 @@ publish:
     - tags
   script:
     - npm run build
-    - curl --request POST --header "Private-Token:MAzPbYT-xgaUgx2Nc4di" --form "file=@/builds/Rett/coordinator/build/coordinator Setup $CI_COMMIT_REF_NAME.exe" "https://gitlab.com/api/v4/projects/18471086/uploads"
-    - curl --request POST --header 'Content-Type:application/json' --header "Private-Token:MAzPbYT-xgaUgx2Nc4di" --data '{"name":"Version $CI_COMMIT_REF_NAME", "tag_name":"$CI_COMMIT_REF_NAME", "description":"https://gitlab.com/api/v4/projects/18471086/uploads/coordinator Setup $CI_COMMIT_REF_NAME.exe"}' "https://gitlab.com/api/v4/projects/18471086/releases"
+    - newline=$'\n'
+    - filename="coordinator Setup $CI_COMMIT_REF_NAME.exe"
+    - content=$(curl --request POST --header "Private-Token:MAzPbYT-xgaUgx2Nc4di" --form "file=@/builds/Rett/coordinator/build/${filename}" "https://gitlab.com/api/v4/projects/18471086/uploads")
+    - url=$(jq -r '.url' <<<"$content")
+    - absolute_url=${CI_PROJECT_URL}${url}
+    - curl --request POST --header 'Content-Type:application/json' --header "Private-Token:MAzPbYT-xgaUgx2Nc4di" --data '{"name":"Version $CI_COMMIT_REF_NAME", "tag_name":"$CI_COMMIT_REF_NAME", "description":"# v$CI_COMMIT_TAG${newline}### Downloads${newline} [${filename}](${absolute_url})${newline}"}' "https://gitlab.com/api/v4/projects/18471086/repository/tags/$CI_COMMIT_REF_NAME/releases"
