@@ -12,8 +12,6 @@ stages:
 
 publish:
   stage: deploy
-  only: 
-    - master
   when: manual
   script:
     - npm run build
