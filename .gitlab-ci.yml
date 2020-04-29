@@ -5,6 +5,8 @@ cache:
     - node_modules/
 
 before_script:
+  - npm install -g n
+  - n 10.16.3
   - npm install
 
 stages:
