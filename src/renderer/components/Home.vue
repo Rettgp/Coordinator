@@ -446,6 +446,15 @@ export default
                 let file_names = [];
                 files.forEach(element => file_names.push(Path.basename(`${normalized_path}/${element}`, '.lua')));
 
+                let jobs_normalized_path = normalized_path + "/jobs"
+                let jobs_dir = Fs.readdirSync(jobs_normalized_path);
+                let job_files = jobs_dir.filter(function (file)
+                {
+                    return file.match(/.*\.(lua)/ig);
+                });
+                job_files.forEach(element => file_names.push("jobs/" + Path.basename(`${jobs_normalized_path}/${element}`, '.lua')));
+
+                this.procedures = [];
                 for (let i = 0; i < file_names.length; ++i)
                 {
                     this.procedures.push(
