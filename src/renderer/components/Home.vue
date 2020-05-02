@@ -287,6 +287,14 @@ export default
                                 this.characters_to_run[i].socket.write(`local_event,testimonyObtained\n`);
                             }
                         }
+                        if (data_words.length === 2 && data_words[1] === "help")
+                        {
+                            this.$refs.LogComponent.Log(`Genkai 10 - HALP`);
+                            for (let i = 0; i < this.characters_to_run.length; ++i)
+                            {
+                                this.characters_to_run[i].socket.write(`local_event,help\n`);
+                            }
+                        }
                         break;
                     }
                     case "einherjar":
