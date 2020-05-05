@@ -32,21 +32,6 @@
                     </v-list>
                 </v-flex>
                 <v-flex d-flex>
-                    <!-- <v-list>
-                        <v-list-group v-for="item in active_procedures" :key="item.name" v-model="item.selected" no-action>
-                            <template v-slot:activator>
-                                <v-list-item-content>
-                                    <v-list-item-title v-text="item.name"></v-list-item-title>
-                                </v-list-item-content>
-                            </template>
-
-                            <v-list-item v-for="subItem in item.characters" :key="subItem.name" @click="">
-                                <v-list-item-content>
-                                    <v-list-item-title v-text="subItem.name"></v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
-                        </v-list-group>
-                    </v-list> -->
                     <v-list :height="(windowSize.y/2) - 110" :disabled="all_tasks_running">
                         <v-subheader>Active Procedures</v-subheader>
                         <draggable v-model="active_procedures" :options="{group:'tasks'}" style="min-height: 10px">
