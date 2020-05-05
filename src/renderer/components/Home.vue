@@ -6,7 +6,7 @@
                 <v-subheader>Characters</v-subheader>
                 <v-list-item-group>
                     <draggable v-model="characters" :clone="CloneCharacter" :options="{group:{name:'tasked_characters', pull:'clone', put:false}}" style="min-height: 10px">
-                        <v-list-item v-for="(item, i) in characters" :key="i">
+                        <v-list-item v-for="(item, i) in characters" :key="i" @mouseover="ExpandActiveProcedures(true)">
                             <v-list-item-content>
                                 <v-list-item-title>{{item.name}}</v-list-item-title>
                                 <v-list-item-subtitle>{{item.main_job + "/" + item.sub_job}}</v-list-item-subtitle>
@@ -16,52 +16,53 @@
                 </v-list-item-group>
             </v-list>
         </v-flex>
-        <v-flex d-flex xs4 sm4 md3 lg3 fill-height>
-            <v-layout row wrap>
-                <v-flex d-flex>
-                    <v-list :height="(windowSize.y/2) - 50">
-                        <v-subheader>Procedures</v-subheader>
-                        <v-list-item-group>
-                            <draggable v-model="procedures" :clone="CloneProcedure" :options="{group:{name:'tasks', pull:'clone', put:false}}" style="min-height: 10px">
-                                <div v-for="(item, i) in procedures" :key="i">
-                                    <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
-                                    <v-list-item :key="i">{{item.name}}</v-list-item>
-                                </div>
-                            </draggable>
-                        </v-list-item-group>
-                    </v-list>
-                </v-flex>
-                <v-flex d-flex>
-                    <v-list :height="(windowSize.y/2) - 110" :disabled="all_tasks_running">
-                        <v-subheader>Active Procedures</v-subheader>
-                        <draggable v-model="active_procedures" :options="{group:'tasks'}" style="min-height: 10px">
-                            <v-list-group v-for="(item, i) in active_procedures" :key="i" v-model="item.selected" no-action :disabled="item.active === true">
-                                <template v-slot:activator>
-                                    <v-icon color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
-                                    <v-list-item-content>
-                                        <v-list-item-title v-text="item.name"></v-list-item-title>
-                                    </v-list-item-content>
-                                </template>
-                                <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
-                                <v-spacer />
-                                <v-progress-circular size=25 v-if="item.active" indeterminate color="primary"></v-progress-circular>
-                                <v-scroll-x-transition>
-                                    <v-icon v-if="item.done" color="success">
-                                        check
-                                    </v-icon>
-                                </v-scroll-x-transition>
-                                <v-list-item v-for="(char, char_key) in item.characters" :key="char_key" @click="">
-                                    <v-list-item-content>
-                                        <v-list-item-title v-text="char.name"></v-list-item-title>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list-group>
-                        </draggable>
-                    </v-list>
-                </v-flex>
-            </v-layout>
+        <v-flex d-flex xs4 sm4 md3 lg2 fill-height>
+            <v-list flat :height="windowSize.y - 150">
+                <v-subheader>Procedures</v-subheader>
+                <v-list-item-group>
+                    <draggable v-model="procedures" :clone="CloneProcedure" :options="{group:{name:'tasks', pull:'clone', put:false}}" style="min-height: 10px">
+                        <div v-for="(item, i) in procedures" :key="i">
+                            <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
+                            <v-list-item :key="i">{{item.name}}</v-list-item>
+                        </div>
+                    </draggable>
+                </v-list-item-group>
+            </v-list>
         </v-flex>
-        <v-btn class="mx-2" fab dark large color="blue" @click="ToggleAllLoop()">
+        <v-flex d-flex xs4 sm4 md4 lg3 fill-height>
+            <v-list flat expand :height="windowSize.y - 150">
+                <v-subheader>Active Procedures
+                    <v-spacer/>
+                    <v-text-field v-model="loop_count" label="Loop Count" dense outlined :min="0" hide-details type="number" style="width: 100px"></v-text-field>
+                </v-subheader>
+                <draggable v-model="active_procedures" :empty-insert-threshold="50" :options="{group:'tasks'}">
+                    <v-list-group v-for="(item, i) in active_procedures" :key="i" v-model="item.selected" no-action>
+                        <template v-slot:activator>
+                            <v-icon v-if="!item.running" color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
+                            <v-list-item-content :disabled="item.running">
+                                <v-list-item-title v-text="item.name"></v-list-item-title>
+                            </v-list-item-content>
+                            <v-progress-circular size=15 v-if="item.running" indeterminate color="primary" class="pr-5"></v-progress-circular>
+                            <v-scroll-x-transition>
+                                <v-icon size=15 v-if="item.done" color="success" class="pr-5">
+                                    check
+                                </v-icon>
+                            </v-scroll-x-transition>
+                            <v-icon v-on:click.stop v-if="!item.running" color="green" @click="LoadProcedure(item)">play_circle_outline</v-icon>
+                            <v-icon v-on:click.stop v-if="item.running" color="red" @click="StopProcedure(item)">stop</v-icon>
+                        </template>
+                        <draggable v-model="item.characters" :disabled="item.running" @change="CharacterAddedToProcedure" :empty-insert-threshold="50" :options="{group:{name:'tasked_characters'}}" style="min-height: 10px">
+                            <v-list-item dense v-for="(char, char_key) in item.characters" :key="char_key">
+                                <v-list-item-content>
+                                    <v-list-item-subtitle v-text="char.name"> </v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </draggable>
+                    </v-list-group>
+                </draggable>
+            </v-list>
+        </v-flex>
+        <v-btn style="z-index: 1000" class="mx-2" top right absolute fab dark large color="blue" @click="ToggleAllLoop()">
             <v-icon v-if="!all_tasks_running" dark>play_arrow</v-icon>
             <v-icon v-if="all_tasks_running" dark>stop</v-icon>
         </v-btn>
@@ -103,12 +104,13 @@ export default
     data: function ()
     {
         return {
-            characters: [new Character("Test", null, [], "DRK", "THF")],
+            characters: [new Character("Test", null, [], "DRK", "THF"), new Character("Test2", null, [], "DRK", "THF")],
             current_procedure_index: null,
             procedures: [new Procedure("Test Proc", false, false, [])],
             active_procedures: [new Procedure("Test Proc")],
             all_tasks_running: false,
             unclaimed_sockets: [],
+            loop_count: 1,
             windowSize:
             {
                 x: 0,
@@ -170,6 +172,31 @@ export default
     },
     methods:
     {
+        CharacterAddedToProcedure(evt)
+        {
+            // let character = evt
+            if (evt.added)
+            {
+                console.log(evt.added.element)
+                console.log(evt.added.newIndex)
+                for (let i = 0; i < this.active_procedures.length; ++i)
+                {
+                    let proc_characters = this.active_procedures[i].characters;
+                    this.active_procedures[i].characters = Array.from(new Set(proc_characters.map(a => a.name)))
+                        .map(name =>
+                        {
+                            return proc_characters.find(a => a.name === name)
+                        })
+                }
+            }
+        },
+        ExpandActiveProcedures(expand)
+        {
+            for (let i = 0; i < this.active_procedures.length; ++i)
+            {
+                this.active_procedures[i].selected = expand;
+            }
+        },
         Heartbeat()
         {
             for (let i = 0; i < this.unclaimed_sockets.length; ++i)
@@ -223,7 +250,7 @@ export default
 
                     if (!task_still_running)
                     {
-                        commanded_procedure.active = false;
+                        commanded_procedure.running = false;
                         commanded_procedure.done = true;
                     }
                 }
@@ -382,7 +409,7 @@ export default
             for (let i = 0; i < this.active_procedures.length; ++i)
             {
                 this.active_procedures[i].done = false;
-                this.active_procedures[i].active = false;
+                this.active_procedures[i].running = false;
             }
 
             if (this.all_tasks_running)
@@ -410,7 +437,7 @@ export default
         LoadProcedure(procedure)
         {
             procedure.done = false
-            procedure.active = true
+            procedure.running = true
             this.$refs.LogComponent.Log(`Starting ${procedure.name}`);
             for (let i = 0; i < procedure.characters.length; ++i)
             {
@@ -421,6 +448,17 @@ export default
                 }
                 procedure.characters[i].StartTask()
                 procedure.characters[i].socket.write(`load,${procedure.name}\n`);
+            }
+        },
+        StopProcedure(procedure)
+        {
+            procedure.done = true
+            procedure.running = false
+            this.$refs.LogComponent.Log(`Stopping ${procedure.name}`);
+            for (let i = 0; i < procedure.characters.length; ++i)
+            {
+                procedure.characters[i].CompleteTask()
+                procedure.characters[i].socket.write(`unload\n`);
             }
         },
         Acknowledge(connection, command, ts)

@@ -3,9 +3,10 @@ export default class Procedure
     constructor(name)
     {
         this.m_name = name
-        this.m_active = false;
+        this.m_running = false;
         this.m_done = false
         this.m_characters = [];
+        this.m_selected = false
     }
 
     get name()
@@ -17,13 +18,13 @@ export default class Procedure
         this.m_name = val;
     }
 
-    get active()
+    get running()
     {
-        return this.m_active;
+        return this.m_running;
     }
-    set active(val)
+    set running(val)
     {
-        this.m_active = val;
+        this.m_running = val;
     }
 
     get done()
@@ -33,6 +34,15 @@ export default class Procedure
     set done(val)
     {
         this.m_done = val;
+    }
+
+    get selected()
+    {
+        return this.m_selected;
+    }
+    set selected(val)
+    {
+        this.m_selected = val;
     }
 
     get characters()
