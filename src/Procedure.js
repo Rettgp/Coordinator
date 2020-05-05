@@ -2,58 +2,58 @@ export default class Procedure
 {
     constructor(name)
     {
-        this.name = name
-        this.active = false;
-        this.done = false
-        this.characters = [];
+        this.m_name = name
+        this.m_active = false;
+        this.m_done = false
+        this.m_characters = [];
     }
 
     get name()
     {
-        return this.name;
+        return this.m_name;
     }
     set name(val)
     {
-        this.name = val;
+        this.m_name = val;
     }
 
     get active()
     {
-        return this.active;
+        return this.m_active;
     }
     set active(val)
     {
-        this.active = val;
+        this.m_active = val;
     }
 
     get done()
     {
-        return this.done;
+        return this.m_done;
     }
     set done(val)
     {
-        this.done = val;
+        this.m_done = val;
     }
 
     get characters()
     {
-        return this.characters;
+        return this.m_characters;
     }
     set characters(val)
     {
-        this.characters = val;
+        this.m_characters = val;
     }
     AddCharacter(character)
     {
-        this.characters.push(character);
+        this.m_characters.push(character);
     }
     FindCharacter(character)
     {
-        for (let i = 0; i < this.characters.length; ++i)
+        for (let i = 0; i < this.m_characters.length; ++i)
         {
-            if (this.characters[i].Equals(character))
+            if (this.m_characters[i].Equals(character))
             {
-                return this.characters[i];
+                return this.m_characters[i];
             }
         }
 
@@ -61,9 +61,9 @@ export default class Procedure
     }
     IsSyncronized()
     {
-        for (let i = 0; i < this.characters.length; ++i)
+        for (let i = 0; i < this.m_characters.length; ++i)
         {
-            if (!this.characters[i].Synced())
+            if (!this.m_characters[i].Synced())
             {
                 return false;
             }

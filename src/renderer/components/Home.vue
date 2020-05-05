@@ -2,10 +2,10 @@
 <v-container fluid grid-list-md fill-height>
     <v-layout row wrap v-resize="OnResize">
         <v-flex d-flex xs4 sm4 md3 lg2 fill-height>
-            <v-list :height="windowSize.y - 150">
+            <v-list flat :height="windowSize.y - 150">
                 <v-subheader>Characters</v-subheader>
                 <v-list-item-group>
-                    <draggable v-model="characters" :clone="CloneCharacter" :options="{group:{name:'characters', pull:'clone', put:false}}" style="min-height: 10px">
+                    <draggable v-model="characters" :clone="CloneCharacter" :options="{group:{name:'tasked_characters', pull:'clone', put:false}}" style="min-height: 10px">
                         <v-list-item v-for="(item, i) in characters" :key="i">
                             <v-list-item-content>
                                 <v-list-item-title>{{item.name}}</v-list-item-title>
@@ -21,7 +21,7 @@
                 <v-flex d-flex>
                     <v-list :height="(windowSize.y/2) - 50">
                         <v-subheader>Procedures</v-subheader>
-                        <v-list-item-group color="primary">
+                        <v-list-item-group>
                             <draggable v-model="procedures" :clone="CloneProcedure" :options="{group:{name:'tasks', pull:'clone', put:false}}" style="min-height: 10px">
                                 <div v-for="(item, i) in procedures" :key="i">
                                     <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
@@ -32,26 +32,46 @@
                     </v-list>
                 </v-flex>
                 <v-flex d-flex>
+                    <!-- <v-list>
+                        <v-list-group v-for="item in active_procedures" :key="item.name" v-model="item.selected" no-action>
+                            <template v-slot:activator>
+                                <v-list-item-content>
+                                    <v-list-item-title v-text="item.name"></v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+
+                            <v-list-item v-for="subItem in item.characters" :key="subItem.name" @click="">
+                                <v-list-item-content>
+                                    <v-list-item-title v-text="subItem.name"></v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                    </v-list> -->
                     <v-list :height="(windowSize.y/2) - 110" :disabled="all_tasks_running">
                         <v-subheader>Active Procedures</v-subheader>
-                        <v-list-item-group color="primary">
-                            <draggable v-model="active_procedures" :options="{group:'tasks'}" style="min-height: 10px">
-                                <div v-for="(item, i) in active_procedures" :key="i">
-                                    <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
-                                    <v-list-item :key="i">
-                                        <v-icon color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
-                                        {{item.name}}
-                                        <v-spacer/>
-                                        <v-progress-circular size=25 v-if="item.active" indeterminate color="primary"></v-progress-circular>
-                                        <v-scroll-x-transition>
-                                            <v-icon v-if="item.done" color="success">
-                                                check
-                                            </v-icon>
-                                        </v-scroll-x-transition>
-                                    </v-list-item>
-                                </div>
-                            </draggable>
-                        </v-list-item-group>
+                        <draggable v-model="active_procedures" :options="{group:'tasks'}" style="min-height: 10px">
+                            <v-list-group v-for="(item, i) in active_procedures" :key="i" v-model="item.selected" no-action :disabled="item.active === true">
+                                <template v-slot:activator>
+                                    <v-icon color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
+                                    <v-list-item-content>
+                                        <v-list-item-title v-text="item.name"></v-list-item-title>
+                                    </v-list-item-content>
+                                </template>
+                                <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
+                                <v-spacer />
+                                <v-progress-circular size=25 v-if="item.active" indeterminate color="primary"></v-progress-circular>
+                                <v-scroll-x-transition>
+                                    <v-icon v-if="item.done" color="success">
+                                        check
+                                    </v-icon>
+                                </v-scroll-x-transition>
+                                <v-list-item v-for="(char, char_key) in item.characters" :key="char_key" @click="">
+                                    <v-list-item-content>
+                                        <v-list-item-title v-text="char.name"></v-list-item-title>
+                                    </v-list-item-content>
+                                </v-list-item>
+                            </v-list-group>
+                        </draggable>
                     </v-list>
                 </v-flex>
             </v-layout>
@@ -98,10 +118,10 @@ export default
     data: function ()
     {
         return {
-            characters: [],
+            characters: [new Character("Test", null, [], "DRK", "THF")],
             current_procedure_index: null,
-            procedures: [],
-            active_procedures: [],
+            procedures: [new Procedure("Test Proc", false, false, [])],
+            active_procedures: [new Procedure("Test Proc")],
             all_tasks_running: false,
             unclaimed_sockets: [],
             windowSize:
@@ -114,54 +134,54 @@ export default
 
     mounted()
     {
-        this.PopulateProcedures(data_store.Get("procedurePath"));
-        EventBus.$on('procedurePath', (path) =>
-        {
-            this.PopulateProcedures(path);
-        });
+        // this.PopulateProcedures(data_store.Get("procedurePath"));
+        // EventBus.$on('procedurePath', (path) =>
+        // {
+        //     this.PopulateProcedures(path);
+        // });
     },
     created: function ()
     {
-        document.addEventListener('beforeunload', () =>
-        {
-            for (let i = 0; i < this.characters; ++i)
-            {
-                this.characters[i].socket.destroy();
-            }
-        })
-        let self = this;
-        net.createServer(function (connection)
-        {
-            self.unclaimed_sockets.push(connection);
-            connection.on("data", function (data)
-            {
-                self.unclaimed_sockets = self.unclaimed_sockets.filter((conn) =>
-                {
-                    conn != connection;
-                });
-                let data_string = data.toString();
-                let commands = data_string.split("\n");
-                for (let i = 0; i < commands.length; ++i)
-                {
-                    let data_words = commands[i].split(",");
-                    self.ProcessCommand(connection, data_words);
-                }
-            });
-            connection.on("close", function (error)
-            {
-                console.log(error);
-                let character = self.characters.find(element => element.socket === connection)
-                self.RemoveConnection(connection);
-            });
-            connection.on("error", function (error)
-            {
-                console.log(error);
-                let character = self.characters.find(element => element.socket === connection)
-                self.RemoveConnection(connection);
-            });
-        }).listen(100);
+        // document.addEventListener('beforeunload', () =>
+        // {
+        //     for (let i = 0; i < this.characters; ++i)
+        //     {
+        //         this.characters[i].socket.destroy();
+        //     }
+        // })
+        // let self = this;
+        // net.createServer(function (connection)
+        // {
+        //     self.unclaimed_sockets.push(connection);
+        //     connection.on("data", function (data)
+        //     {
+        //         self.unclaimed_sockets = self.unclaimed_sockets.filter((conn) =>
+        //         {
+        //             conn != connection;
+        //         });
+        //         let data_string = data.toString();
+        //         let commands = data_string.split("\n");
+        //         for (let i = 0; i < commands.length; ++i)
+        //         {
+        //             let data_words = commands[i].split(",");
+        //             self.ProcessCommand(connection, data_words);
+        //         }
+        //     });
+        //     connection.on("close", function (error)
+        //     {
+        //         console.log(error);
+        //         let character = self.characters.find(element => element.socket === connection)
+        //         self.RemoveConnection(connection);
+        //     });
+        //     connection.on("error", function (error)
+        //     {
+        //         console.log(error);
+        //         let character = self.characters.find(element => element.socket === connection)
+        //         self.RemoveConnection(connection);
+        //     });
+        // }).listen(100);
 
-        setInterval(this.Heartbeat, 1000);
+        // setInterval(this.Heartbeat, 1000);
     },
     methods:
     {
@@ -342,7 +362,7 @@ export default
                 return;
             }
 
-            this.characters.push(new Character( name, socket, [], main_job, sub_job));
+            this.characters.push(new Character(name, socket, [], main_job, sub_job));
             connection.write(`connection,established ${name}\n`);
             this.$refs.LogComponent.Log(`${name} Connected`);
         },

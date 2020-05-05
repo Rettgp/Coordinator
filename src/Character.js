@@ -13,119 +13,119 @@ export default class Character
 {
     constructor(name, socket, procs, main_job, sub_job)
     {
-        this.name = name;
-        this.socket = socket;
-        this.procs = procs;
-        this.sync_state = SyncState.DEFAULT;
-        this.completion_state = CompletionState.WAITING;
-        this.main_job = main_job;
-        this.sub_job = sub_job;
+        this.m_name = name;
+        this.m_socket = socket;
+        this.m_procs = procs;
+        this.m_sync_state = SyncState.DEFAULT;
+        this.m_completion_state = CompletionState.WAITING;
+        this.m_main_job = main_job;
+        this.m_sub_job = sub_job;
     }
 
     get name()
     {
-        return this.name
+        return this.m_name;
     }
     set name(val)
     {
-        this.name = name
+        this.m_name = val;
     }
 
     get socket()
     {
-        return this.socket
+        return this.m_socket
     }
     set socket(val)
     {
-        this.socket = val
+        this.m_socket = val;
     }
 
     get procs()
     {
-        return this.procs
+        return this.m_procs;
     }
     set procs(val)
     {
-        this.procs = val
+        this.m_procs = val;
     }
 
     get sync_state()
     {
-        return this.sync_state
+        return this.m_sync_state;
     }
     set sync_state(val)
     {
-        this.sync_state = val
+        this.m_sync_state = val;
     }
 
     get completion_state()
     {
-        return this.completion_state
+        return this.m_completion_state;
     }
     set completion_state(val)
     {
-        this.completion_state = val
+        this.m_completion_state = val;
     }
 
     get main_job()
     {
-        return this.main_job
+        return this.m_main_job;
     }
     set main_job(val)
     {
-        this.main_job = val
+        this.m_main_job = val;
     }
 
     get sub_job()
     {
-        return this.sync_state
+        return this.m_sub_job;
     }
     set sub_job(val)
     {
-        this.sub_job = val
+        this.m_sub_job = val;
     }
 
     IsRunning()
     {
-        return this.completion_state === CompletionState.RUNNING;
+        return this.m_completion_state === CompletionState.RUNNING;
     }
     IsWaiting()
     {
-        return this.completion_state === CompletionState.WAITING;
+        return this.m_completion_state === CompletionState.WAITING;
     }
 
     CompleteTask()
     {
-        this.completion_state = CompletionState.TASK_COMPLETED_WAITING;
+        this.m_completion_state = CompletionState.TASK_COMPLETED_WAITING;
     }
 
     StartTask()
     {
-        this.completion_state = CompletionState.RUNNING;
+        this.m_completion_state = CompletionState.RUNNING;
     }
 
     Synced()
     {
-        this.sync_state = SyncState.SYNCED;
+        this.m_sync_state = SyncState.SYNCED;
     }
 
     SyncWait()
     {
-        this.sync_state = SyncState.SYNCING;
+        this.m_sync_state = SyncState.SYNCING;
     }
 
     IsSynced()
     {
-        return this.sync_state = SyncState.SYNCED;
+        return this.m_sync_state = SyncState.SYNCED;
     }
 
     IsSyncing()
     {
-        return this.sync_state = SyncState.SYNCING;
+        return this.m_sync_state = SyncState.SYNCING;
     }
 
     Equals(character_class)
     {
-        return this.name === character_class.name || this.socket === character_class.socket;
+        return this.m_name === character_class.name || this.m_socket === character_class.socket;
     }
 }
