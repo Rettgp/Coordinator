@@ -513,6 +513,14 @@ export default
                 });
                 job_files.forEach(element => file_names.push("jobs/" + Path.basename(`${jobs_normalized_path}/${element}`, '.lua')));
 
+                let missions_normalized_path = normalized_path + "/missions"
+                let missions_dir = Fs.readdirSync(missions_normalized_path);
+                let missions_files = missions_dir.filter(function (file)
+                {
+                    return file.match(/.*\.(lua)/ig);
+                });
+                missions_files.forEach(element => file_names.push("missions/" + Path.basename(`${missions_normalized_path}/${element}`, '.lua')));
+
                 this.procedures = [];
                 for (let i = 0; i < file_names.length; ++i)
                 {
