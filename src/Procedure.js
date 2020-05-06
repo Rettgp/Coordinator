@@ -73,8 +73,9 @@ export default class Procedure
     {
         for (let i = 0; i < this.m_characters.length; ++i)
         {
-            if (!this.m_characters[i].Synced())
+            if (!this.m_characters[i].IsSynced())
             {
+                console.log(`${this.m_characters[i].name} is not synced`)
                 return false;
             }
         }

@@ -124,6 +124,17 @@ export default class Character
         return this.m_sync_state = SyncState.SYNCING;
     }
 
+    ResetStates()
+    {
+        this.ResetSyncState();
+        this.completion_state = CompletionState.WAITING;
+    }
+
+    ResetSyncState()
+    {
+        this.m_sync_state = SyncState.DEFAULT;
+    }
+
     Equals(character_class)
     {
         return this.m_name === character_class.name || this.m_socket === character_class.socket;

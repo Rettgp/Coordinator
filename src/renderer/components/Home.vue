@@ -35,7 +35,7 @@
                     <v-spacer/>
                     <v-text-field v-model="loop_count" label="Loop Count" dense outlined :min="0" hide-details type="number" style="width: 100px"></v-text-field>
                 </v-subheader>
-                <draggable v-model="active_procedures" :empty-insert-threshold="50" :options="{group:'tasks'}">
+                <draggable v-model="active_procedures" :empty-insert-threshold="500" :options="{group:'tasks'}">
                     <v-list-group v-for="(item, i) in active_procedures" :key="i" v-model="item.selected" no-action>
                         <template v-slot:activator>
                             <v-icon v-if="!item.running" color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
@@ -58,6 +58,7 @@
                                 </v-list-item-content>
                             </v-list-item>
                         </draggable>
+                        <v-divider :key="`${i}-divider`"></v-divider>
                     </v-list-group>
                 </draggable>
             </v-list>
@@ -104,10 +105,10 @@ export default
     data: function ()
     {
         return {
-            characters: [new Character("Test", null, [], "DRK", "THF"), new Character("Test2", null, [], "DRK", "THF")],
+            characters: [],
             current_procedure_index: null,
-            procedures: [new Procedure("Test Proc", false, false, [])],
-            active_procedures: [new Procedure("Test Proc")],
+            procedures: [],
+            active_procedures: [],
             all_tasks_running: false,
             unclaimed_sockets: [],
             loop_count: 1,
@@ -121,54 +122,54 @@ export default
 
     mounted()
     {
-        // this.PopulateProcedures(data_store.Get("procedurePath"));
-        // EventBus.$on('procedurePath', (path) =>
-        // {
-        //     this.PopulateProcedures(path);
-        // });
+        this.PopulateProcedures(data_store.Get("procedurePath"));
+        EventBus.$on('procedurePath', (path) =>
+        {
+            this.PopulateProcedures(path);
+        });
     },
     created: function ()
     {
-        // document.addEventListener('beforeunload', () =>
-        // {
-        //     for (let i = 0; i < this.characters; ++i)
-        //     {
-        //         this.characters[i].socket.destroy();
-        //     }
-        // })
-        // let self = this;
-        // net.createServer(function (connection)
-        // {
-        //     self.unclaimed_sockets.push(connection);
-        //     connection.on("data", function (data)
-        //     {
-        //         self.unclaimed_sockets = self.unclaimed_sockets.filter((conn) =>
-        //         {
-        //             conn != connection;
-        //         });
-        //         let data_string = data.toString();
-        //         let commands = data_string.split("\n");
-        //         for (let i = 0; i < commands.length; ++i)
-        //         {
-        //             let data_words = commands[i].split(",");
-        //             self.ProcessCommand(connection, data_words);
-        //         }
-        //     });
-        //     connection.on("close", function (error)
-        //     {
-        //         console.log(error);
-        //         let character = self.characters.find(element => element.socket === connection)
-        //         self.RemoveConnection(connection);
-        //     });
-        //     connection.on("error", function (error)
-        //     {
-        //         console.log(error);
-        //         let character = self.characters.find(element => element.socket === connection)
-        //         self.RemoveConnection(connection);
-        //     });
-        // }).listen(100);
+        document.addEventListener('beforeunload', () =>
+        {
+            for (let i = 0; i < this.characters; ++i)
+            {
+                this.characters[i].socket.destroy();
+            }
+        })
+        let self = this;
+        net.createServer(function (connection)
+        {
+            self.unclaimed_sockets.push(connection);
+            connection.on("data", function (data)
+            {
+                self.unclaimed_sockets = self.unclaimed_sockets.filter((conn) =>
+                {
+                    conn != connection;
+                });
+                let data_string = data.toString();
+                let commands = data_string.split("\n");
+                for (let i = 0; i < commands.length; ++i)
+                {
+                    let data_words = commands[i].split(",");
+                    self.ProcessCommand(connection, data_words);
+                }
+            });
+            connection.on("close", function (error)
+            {
+                console.log(error);
+                let character = self.characters.find(element => element.socket === connection)
+                self.RemoveConnection(connection);
+            });
+            connection.on("error", function (error)
+            {
+                console.log(error);
+                let character = self.characters.find(element => element.socket === connection)
+                self.RemoveConnection(connection);
+            });
+        }).listen(100);
 
-        // setInterval(this.Heartbeat, 1000);
+        setInterval(this.Heartbeat, 1000);
     },
     methods:
     {
@@ -177,8 +178,6 @@ export default
             // let character = evt
             if (evt.added)
             {
-                console.log(evt.added.element)
-                console.log(evt.added.newIndex)
                 for (let i = 0; i < this.active_procedures.length; ++i)
                 {
                     let proc_characters = this.active_procedures[i].characters;
@@ -206,28 +205,36 @@ export default
         },
         ProcessCommand(connection, data_words)
         {
-            let commanded_character = this.characters.find(element => element.socket === connection)
-            let commanded_procedure = null;
-            for (let i = 0; i < this.active_procedures.length; ++i)
-            {
-                let active_procedure = this.active_procedures[i];
-                let active_procedure_character = active_procedure.FindCharacter(commanded_character)
-                if (active_procedure_character !== null)
-                {
-                    commanded_procedure = active_procedure;
-                }
-            }
-            if (!commanded_procedure)
-            {
-                // TODO: Check if this is valid
-                return;
-            }
-
             if (data_words.length > 1 && data_words[0] === "connection")
             {
                 this.NewConnection(connection, data_words[1], data_words[2], data_words[3]);
             }
-            else if (data_words.length > 1 && data_words[0] === "!procedure")
+
+            let commanded_procedure = null;
+            let commanded_character = this.characters.find(element => element.socket === connection)
+            let active_character = null;
+            for (let i = 0; i < this.active_procedures.length; ++i)
+            {
+                let active_procedure = this.active_procedures[i];
+                if (!active_procedure.running)
+                {
+                    continue;
+                }
+
+                active_character = active_procedure.FindCharacter(commanded_character);
+                if (active_character !== null)
+                {
+                    commanded_procedure = active_procedure;
+                    break;
+                }
+            }
+            if (!commanded_procedure || !active_character)
+            {
+                console.log("No procedure or character");
+                return;
+            }
+
+            if (data_words.length > 1 && data_words[0] === "!procedure")
             {
                 this.Acknowledge(connection, "procedure", data_words[2]);
             }
@@ -238,8 +245,8 @@ export default
 
                 if (commanded_procedure !== null)
                 {
-                    let characters_in_completed_task = active_procedures.characters;
-                    commanded_character.CompleteTask();
+                    let characters_in_completed_task = commanded_procedure.characters;
+                    active_character.CompleteTask();
                     for (let i = 0; i < characters_in_completed_task.length; ++i)
                     {
                         if (characters_in_completed_task[i].IsRunning() || characters_in_completed_task[i].IsWaiting())
@@ -260,9 +267,15 @@ export default
                     this.current_procedure_index++;
                     if (this.current_procedure_index >= this.active_procedures.length)
                     {
-                        this.$refs.LogComponent.Log(`ALL DONE!`);
-                        this.all_tasks_running = false;
-                        return;
+                        --this.loop_count;
+                        if (this.loop_count <= 0)
+                        {
+                            this.$refs.LogComponent.Log(`ALL DONE!`);
+                            this.all_tasks_running = false;
+                            return;
+                        }
+                        
+                        this.current_procedure_index = 0;
                     }
                     const next_procedure = this.active_procedures[this.current_procedure_index];
                     this.LoadProcedure(next_procedure);
@@ -271,20 +284,20 @@ export default
             else if (data_words.length > 1 && data_words[0] === "!sync")
             {
                 this.Acknowledge(connection, "sync", data_words[1]);
-                commanded_character.SyncWait();
-                this.$refs.LogComponent.Log(`${commanded_character.name} Syncing...`);
+                active_character.SyncWait();
+                this.$refs.LogComponent.Log(`${active_character.name} Syncing...`);
             }
             else if (data_words.length > 1 && data_words[0] === "!finished_sync")
             {
                 this.Acknowledge(connection, "finished_sync", data_words[1]);
-                commanded_character.Synced();
-                this.$refs.LogComponent.Log(`${character.name} Synced`);
+                active_character.Synced();
+                this.$refs.LogComponent.Log(`${active_character.name} Synced`);
 
                 if (commanded_procedure && commanded_procedure.IsSyncronized())
                 {
                     for (let i = 0; i < commanded_procedure.characters.length; ++i)
                     {
-                        commanded_procedure.characters[i].sync_state = SyncState.DEFAULT;
+                        commanded_procedure.characters[i].ResetSyncState();
                         commanded_procedure.characters[i].socket.write(`synchronized\n`);
                     }
                     this.$refs.LogComponent.Log(`All synchronized. Continue`);
@@ -298,7 +311,7 @@ export default
                 let procs = data_words[1].split("|");
                 for (let i = 0; i < commanded_procedure.characters.length; ++i)
                 {
-                    if (commanded_procedure.characters[i].name !== commanded_character.name)
+                    if (commanded_procedure.characters[i].name !== active_character.name)
                     {
                         // TODO: This is empty because this character probably hasnt initialized its procs yet.
                         console.log(`Procs: ${commanded_procedure.characters[i].procs}`);
@@ -356,7 +369,7 @@ export default
                     }
                     default:
                     {
-                        this.$refs.LogComponent.Log(`${commanded_procedure.name}: Local Event - Unhandled ${data_string}`);
+                        this.$refs.LogComponent.Log(`${commanded_procedure.name}: Local Event - Unhandled ${data_words[0]}`);
                         break;
                     }
                 }
@@ -369,12 +382,11 @@ export default
             {
                 character.socket = connection;
                 character.procs = [];
-                character.sync_state = SyncState.DEFAULT;
-                character.completion_state = CompletionState.RUNNING;
+                character.ResetStates();
                 return;
             }
 
-            this.characters.push(new Character(name, socket, [], main_job, sub_job));
+            this.characters.push(new Character(name, connection, [], main_job, sub_job));
             connection.write(`connection,established ${name}\n`);
             this.$refs.LogComponent.Log(`${name} Connected`);
         },
@@ -398,7 +410,7 @@ export default
             for (let i = 0; i < this.active_procedures.length; ++i)
             {
                 let active_procedure = this.active_procedures[i];
-                active_procedure.character = active_procedure.characters.filter((element) =>
+                active_procedure.characters = active_procedure.characters.filter((element) =>
                 {
                     return element.socket !== connection;
                 });
@@ -528,19 +540,7 @@ export default
         RemoveActiveProcedure(procedure)
         {
             this.active_procedures = this.active_procedures.filter(item => item !== procedure);
-        },
-        // ToggleCharacterToRun(character)
-        // {
-        //     if (this.characters_to_run.includes(character))
-        //     {
-        //         this.characters_to_run = 
-        //             this.characters_to_run.filter(elem => elem.name !== character.name);
-        //     }
-        //     else
-        //     {
-        //         this.characters_to_run.push(character);
-        //     }
-        // }
+        }
     }
 };
 </script>
