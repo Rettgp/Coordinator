@@ -1,11 +1,11 @@
 <template>
 <v-container fluid grid-list-md fill-height>
     <v-layout row wrap v-resize="OnResize">
-        <v-flex d-flex xs4 sm4 md3 lg2 fill-height>
+        <v-flex d-flex xs3 sm3 md2 lg2 fill-height>
             <v-list flat :height="windowSize.y - 150">
                 <v-subheader>Characters</v-subheader>
                 <v-list-item-group>
-                    <draggable v-model="characters" :clone="CloneCharacter" :options="{group:{name:'tasked_characters', pull:'clone', put:false}}" style="min-height: 10px">
+                    <draggable v-model="characters" :options="{group:{name:'tasked_characters', pull:'clone', put:false}}" style="min-height: 10px">
                         <v-list-item v-for="(item, i) in characters" :key="i" @mouseover="ExpandActiveProcedures(true)">
                             <v-list-item-content>
                                 <v-list-item-title>{{item.name}}</v-list-item-title>
@@ -16,7 +16,7 @@
                 </v-list-item-group>
             </v-list>
         </v-flex>
-        <v-flex d-flex xs4 sm4 md3 lg2 fill-height>
+        <v-flex d-flex xs3 sm3 md3 lg3 fill-height>
             <v-list flat :height="windowSize.y - 150">
                 <v-subheader>Procedures</v-subheader>
                 <v-list-item-group>
@@ -29,10 +29,10 @@
                 </v-list-item-group>
             </v-list>
         </v-flex>
-        <v-flex d-flex xs4 sm4 md4 lg3 fill-height>
+        <v-flex d-flex xs4 sm5 md6 lg5 fill-height>
             <v-list flat expand :height="windowSize.y - 150">
                 <v-subheader>Active Procedures
-                    <v-spacer/>
+                    <v-spacer />
                     <v-text-field v-model="loop_count" label="Loop Count" dense outlined :min="0" hide-details type="number" style="width: 100px"></v-text-field>
                 </v-subheader>
                 <draggable v-model="active_procedures" :empty-insert-threshold="500" :options="{group:'tasks'}">
@@ -41,15 +41,17 @@
                             <v-icon v-if="!item.running" color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
                             <v-list-item-content :disabled="item.running">
                                 <v-list-item-title v-text="item.name"></v-list-item-title>
+                                <v-progress-linear absolute bottom v-if="item.running" v-model="item.progress" color="blue"></v-progress-linear>
                             </v-list-item-content>
-                            <v-progress-circular size=15 v-if="item.running" indeterminate color="primary" class="pr-5"></v-progress-circular>
                             <v-scroll-x-transition>
-                                <v-icon size=15 v-if="item.done" color="success" class="pr-5">
+                                <v-icon size=15 v-if="item.done" color="success" class="pr-2">
                                     check
                                 </v-icon>
                             </v-scroll-x-transition>
-                            <v-icon v-on:click.stop v-if="!item.running" color="green" @click="LoadProcedure(item)">play_circle_outline</v-icon>
-                            <v-icon v-on:click.stop v-if="item.running" color="red" @click="StopProcedure(item)">stop</v-icon>
+                            <v-text-field v-on:click.stop class="pr-2" v-model="item.repeat_count" label="Repeat" dense outlined :min="0" hide-details type="number" style="width: 5px"></v-text-field>
+                            <v-progress-circular size=15 v-if="item.queued" indeterminate color="primary" class="pr-8"></v-progress-circular>
+                            <v-icon v-on:click.stop v-if="!item.running && !item.queued" color="green" @click="StartProcedure(item)">play_circle_outline</v-icon>
+                            <v-icon v-on:click.stop v-if="item.running || item.queued" color="red" @click="StopProcedure(item)">stop</v-icon>
                         </template>
                         <draggable v-model="item.characters" :disabled="item.running" @change="CharacterAddedToProcedure" :empty-insert-threshold="50" :options="{group:{name:'tasked_characters'}}" style="min-height: 10px">
                             <v-list-item dense v-for="(char, char_key) in item.characters" :key="char_key">
@@ -111,6 +113,7 @@ export default
             active_procedures: [],
             all_tasks_running: false,
             unclaimed_sockets: [],
+            queued_procedures: [],
             loop_count: 1,
             windowSize:
             {
@@ -170,6 +173,7 @@ export default
         }).listen(100);
 
         setInterval(this.Heartbeat, 1000);
+        setInterval(this.CheckQueuedProcedures, 1000);
     },
     methods:
     {
@@ -230,7 +234,6 @@ export default
             }
             if (!commanded_procedure || !active_character)
             {
-                console.log("No procedure or character");
                 return;
             }
 
@@ -243,43 +246,39 @@ export default
                 this.Acknowledge(connection, "complete", data_words[1]);
                 let task_still_running = false;
 
-                if (commanded_procedure !== null)
+                if (commanded_procedure === null)
                 {
-                    let characters_in_completed_task = commanded_procedure.characters;
-                    active_character.CompleteTask();
-                    for (let i = 0; i < characters_in_completed_task.length; ++i)
-                    {
-                        if (characters_in_completed_task[i].IsRunning() || characters_in_completed_task[i].IsWaiting())
-                        {
-                            task_still_running = true;
-                        }
-                    }
+                    return;
+                }
 
-                    if (!task_still_running)
+                let characters_in_completed_task = commanded_procedure.characters;
+                active_character.CompleteTask();
+                for (let i = 0; i < characters_in_completed_task.length; ++i)
+                {
+                    if (characters_in_completed_task[i].IsRunning() || characters_in_completed_task[i].IsWaiting())
+                    {
+                        task_still_running = true;
+                    }
+                }
+
+                if (!task_still_running)
+                {
+                    ++commanded_procedure.current_it;
+                    if (commanded_procedure.current_it >= commanded_procedure.repeat_count)
                     {
                         commanded_procedure.running = false;
                         commanded_procedure.done = true;
+                        if (this.all_tasks_running)
+                        {
+                            this.ProceedToNextProcedure()
+                        }
+                    }
+                    else
+                    {
+                        this.RepeatProcedure(commanded_procedure);
                     }
                 }
 
-                if (this.all_tasks_running && !task_still_running)
-                {
-                    this.current_procedure_index++;
-                    if (this.current_procedure_index >= this.active_procedures.length)
-                    {
-                        --this.loop_count;
-                        if (this.loop_count <= 0)
-                        {
-                            this.$refs.LogComponent.Log(`ALL DONE!`);
-                            this.all_tasks_running = false;
-                            return;
-                        }
-                        
-                        this.current_procedure_index = 0;
-                    }
-                    const next_procedure = this.active_procedures[this.current_procedure_index];
-                    this.LoadProcedure(next_procedure);
-                }
             }
             else if (data_words.length > 1 && data_words[0] === "!sync")
             {
@@ -427,10 +426,9 @@ export default
             if (this.all_tasks_running)
             {
                 this.all_tasks_running = false;
-                let active_procedure = this.active_procedures[this.current_procedure_index];
-                for (let i = 0; i < active_procedure.characters.length; ++i)
+                for (let i = 0; i < this.active_procedures.length; ++i)
                 {
-                    active_procedure.characters[i].socket.write(`unload\n`);
+                    this.active_procedures[i].Stop();
                 }
                 return;
             }
@@ -444,33 +442,91 @@ export default
             this.current_procedure_index = 0;
             this.all_tasks_running = true;
 
-            this.LoadProcedure(this.active_procedures[this.current_procedure_index]);
+            this.StartProcedure(this.active_procedures[this.current_procedure_index]);
         },
-        LoadProcedure(procedure)
+        ProceedToNextProcedure()
         {
-            procedure.done = false
-            procedure.running = true
-            this.$refs.LogComponent.Log(`Starting ${procedure.name}`);
-            for (let i = 0; i < procedure.characters.length; ++i)
+            this.current_procedure_index++;
+            if (this.current_procedure_index >= this.active_procedures.length)
             {
-                if (procedure.characters[i].IsRunning())
+                --this.loop_count;
+                this.loop_count = Math.max(this.loop_count, 0);
+
+                if (this.loop_count <= 0)
                 {
-                    this.$refs.LogComponent.Log(`${procedure.characters[i].name} IS ALREADY RUNNING A TASK!`);
+                    this.$refs.LogComponent.Log(`ALL DONE!`);
+                    this.all_tasks_running = false;
                     return;
                 }
-                procedure.characters[i].StartTask()
-                procedure.characters[i].socket.write(`load,${procedure.name}\n`);
+
+                this.current_procedure_index = 0;
+            }
+
+            const next_procedure = this.active_procedures[this.current_procedure_index];
+            this.StartProcedure(next_procedure);
+        },
+        CheckQueuedProcedures()
+        {
+            let new_queue = [];
+            for (let i = 0; i < this.queued_procedures.length; ++i)
+            {
+                let queued_procedure = this.queued_procedures[i];
+                if (!queued_procedure.queued)
+                {
+                    continue;
+                }
+
+                let any_character_running = queued_procedure.characters.some((element) => element.IsRunning());
+                if (!any_character_running)
+                {
+                    this.StartProcedure(queued_procedure);
+                }
+                else
+                {
+                    new_queue.push(queued_procedure);
+                }
+            }
+
+            this.queued_procedures = new_queue;
+        },
+        AddProcedureToQueue(procedure)
+        {
+            this.queued_procedures.push(procedure);
+        },
+        RepeatProcedure(procedure)
+        {
+            let loaded = procedure.Load();
+            if (!loaded && procedure.queued)
+            {
+                this.AddProcedureToQueue(procedure);
+            }
+            if (!loaded && this.all_tasks_running)
+            {
+                this.ProceedToNextProcedure();
+            }
+        },
+        StartProcedure(procedure)
+        {
+            procedure.current_it = 1;
+            let loaded = procedure.Load();
+            if (!loaded && procedure.queued)
+            {
+                this.AddProcedureToQueue(procedure);
+            }
+            if (!loaded && this.all_tasks_running)
+            {
+                this.ProceedToNextProcedure();
             }
         },
         StopProcedure(procedure)
         {
-            procedure.done = true
-            procedure.running = false
-            this.$refs.LogComponent.Log(`Stopping ${procedure.name}`);
-            for (let i = 0; i < procedure.characters.length; ++i)
+            if (procedure.queued)
             {
-                procedure.characters[i].CompleteTask()
-                procedure.characters[i].socket.write(`unload\n`);
+                procedure.queued = false;
+            }
+            else
+            {
+                procedure.Stop();
             }
         },
         Acknowledge(connection, command, ts)
