@@ -1,6 +1,6 @@
 {
   "name": "coordinator",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "author": "Rett",
   "description": "Coordinate all the things",
   "license": null,
@@ -20,6 +20,7 @@
     "productName": "coordinator",
     "appId": "com.rett.coordinator",
     "directories": {
+      "buildResources": "resources",
       "output": "build"
     },
     "files": [
