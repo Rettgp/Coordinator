@@ -20,6 +20,7 @@
     "productName": "coordinator",
     "appId": "com.rett.coordinator",
     "directories": {
+      "buildResources": "resources",
       "output": "build"
     },
     "files": [
