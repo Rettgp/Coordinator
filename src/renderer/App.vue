@@ -68,7 +68,7 @@ export default
     data()
     {
         return {
-            drawer: null,
+            drawer: false,
             show_path_card: null,
             procedure_path: String,
             app_version: 'V' + require('../../package.json').version
