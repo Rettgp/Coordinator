@@ -41,7 +41,7 @@
                             <v-icon v-if="!item.running" color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
                             <v-list-item-content :disabled="item.running">
                                 <v-list-item-title v-text="item.name"></v-list-item-title>
-                                <v-progress-linear absolute bottom v-if="item.running" v-model="item.progress" color="blue"></v-progress-linear>
+                                <v-progress-linear absolute bottom stream buffer-value="0" v-if="item.running" v-model="item.progress" color="blue"></v-progress-linear>
                             </v-list-item-content>
                             <v-scroll-x-transition>
                                 <v-icon size=15 v-if="item.done" color="success" class="pr-2">
@@ -507,7 +507,7 @@ export default
         },
         StartProcedure(procedure)
         {
-            procedure.current_it = 1;
+            procedure.current_it = 0;
             let loaded = procedure.Load();
             if (!loaded && procedure.queued)
             {
