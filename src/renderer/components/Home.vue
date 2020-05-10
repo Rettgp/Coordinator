@@ -257,6 +257,7 @@ export default
                 {
                     if (characters_in_completed_task[i].IsRunning() || characters_in_completed_task[i].IsWaiting())
                     {
+                        characters_in_completed_task[i].socket.write(`character_completed,${active_character.name}\n`);
                         task_still_running = true;
                     }
                 }
@@ -319,6 +320,19 @@ export default
                         connection.write(`procs,${commanded_procedure.characters[i].procs.join('|')}\n`);
                     }
                 }
+            }
+            else if (data_words[0] === "!all_characters")
+            {
+                let all_characters = [];
+                for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                {
+                    if (commanded_procedure.characters[i].name !== active_character.name)
+                    {
+                        all_characters.push(commanded_procedure.characters[i].name);
+                    }
+                }
+
+                connection.write(`all_characters,${all_characters.join("|")}`);
             }
             else if (data_words[0] === "!local_event")
             {
