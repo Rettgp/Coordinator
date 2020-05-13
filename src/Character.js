@@ -116,12 +116,12 @@ export default class Character
 
     IsSynced()
     {
-        return this.m_sync_state = SyncState.SYNCED;
+        return this.m_sync_state === SyncState.SYNCED;
     }
 
     IsSyncing()
     {
-        return this.m_sync_state = SyncState.SYNCING;
+        return this.m_sync_state === SyncState.SYNCING;
     }
 
     ResetStates()

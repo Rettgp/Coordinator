@@ -298,6 +298,10 @@ export default
                     for (let i = 0; i < commanded_procedure.characters.length; ++i)
                     {
                         commanded_procedure.characters[i].ResetSyncState();
+                    }
+
+                    for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                    {
                         commanded_procedure.characters[i].socket.write(`synchronized\n`);
                     }
                     this.$refs.LogComponent.Log(`All synchronized. Continue`);
