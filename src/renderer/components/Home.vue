@@ -96,6 +96,13 @@ const data_store = new DataStore(
     defaults: null
 });
 
+let reported_character_procs = 0;
+let global_procs = new Set()
+let most_procs_last = function(char1, char2)
+{
+    return char1.available_procs.length - char2.available_procs.length;
+}
+
 export default
 {
     name: "home",
@@ -309,20 +316,59 @@ export default
             }
             else if (data_words[0] === "!procs")
             {
-                // TODO: This overall needs to be smarter. If a BLM initializes its procs
-                // first it will have A SHIT TON of procs. Maybe find shared procs between characters
-                // then run a redistribute function to distribute those out.
-                let procs = data_words[1].split("|");
-                for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                if (data_words[1] === false || data_words[1] === "")
                 {
-                    if (commanded_procedure.characters[i].name !== active_character.name)
+                    connection.write(`procs,nil\n`);
+                    return;
+                }
+
+                let procs = data_words[1].split("|");
+                active_character.available_procs = procs;
+                procs.forEach(item => global_procs.add(item))
+
+                reported_character_procs++;
+                if (reported_character_procs >= commanded_procedure.characters.length)
+                {
+                    active_character.procs = []
+                    while (global_procs.size > 0)
                     {
-                        // TODO: This is empty because this character probably hasnt initialized its procs yet.
-                        console.log(`Procs: ${commanded_procedure.characters[i].procs}`);
-                        procs = procs.filter(proc => commanded_procedure.characters[i].procs.length === 0 || !commanded_procedure.characters[i].procs.includes(proc));
-                        commanded_procedure.characters[i].procs = procs;
-                        connection.write(`procs,${commanded_procedure.characters[i].procs.join('|')}\n`);
+                        const it = global_procs[Symbol.iterator]();
+                        let global_proc_it = it.next();
+                        while (!global_proc_it.done)
+                        {
+                            let possible_chars_for_proc = new Array()
+                            for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                            {
+                                let character = commanded_procedure.characters[i];
+                                if (character.available_procs.includes(global_proc_it.value))
+                                {
+                                    possible_chars_for_proc.push(character);
+                                }
+                            }
+
+                            possible_chars_for_proc.sort(most_procs_last);
+                            if (possible_chars_for_proc.length !== 0)
+                            {
+                                possible_chars_for_proc[0].procs.push(global_proc_it.value);
+                            }
+                            global_procs.delete(global_proc_it.value);
+                            global_proc_it = it.next();
+                        }
                     }
+
+                    for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                    {
+                        let character = commanded_procedure.characters[i];
+                        if (character.procs.length === 0)
+                        {
+                            character.socket.write(`procs,nil\n`);
+                        }
+                        else
+                        {
+                            character.socket.write(`procs,${character.procs.join('|')}\n`);
+                        }
+                    }
+                    reported_character_procs = 0;
                 }
             }
             else if (data_words[0] === "!all_characters")

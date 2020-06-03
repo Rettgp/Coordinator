@@ -15,11 +15,12 @@ export default class Character
     {
         this.m_name = name;
         this.m_socket = socket;
-        this.m_procs = procs;
+        this.m_available_procs = procs;
         this.m_sync_state = SyncState.DEFAULT;
         this.m_completion_state = CompletionState.WAITING;
         this.m_main_job = main_job;
         this.m_sub_job = sub_job;
+        this.m_procs = [];
     }
 
     get name()
@@ -47,6 +48,15 @@ export default class Character
     set procs(val)
     {
         this.m_procs = val;
+    }
+
+    get available_procs()
+    {
+        return this.m_available_procs;
+    }
+    set available_procs(val)
+    {
+        this.m_available_procs = val;
     }
 
     get sync_state()
