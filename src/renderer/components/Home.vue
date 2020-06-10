@@ -29,7 +29,7 @@
                 </v-list-item-group>
             </v-list>
         </v-flex>
-        <v-flex d-flex xs4 sm5 md6 lg5 fill-height>
+        <v-flex d-flex xs6 sm6 md7 lg7 fill-height>
             <v-list flat expand :height="windowSize.y - 150">
                 <v-subheader>Active Procedures
                     <v-spacer />
@@ -48,10 +48,11 @@
                                     check
                                 </v-icon>
                             </v-scroll-x-transition>
-                            <v-text-field v-on:click.stop class="pr-2" v-model="item.repeat_count" label="Repeat" dense outlined :min="0" hide-details type="number" style="width: 5px"></v-text-field>
+                            <v-text-field absolute right v-on:click.stop class="pr-2" v-model="item.repeat_count" label="Repeat" dense outlined :min="0" hide-details type="number" style="width: 5px"></v-text-field>
                             <v-progress-circular size=15 v-if="item.queued" indeterminate color="primary" class="pr-8"></v-progress-circular>
                             <v-icon v-on:click.stop v-if="!item.running && !item.queued" color="green" @click="StartProcedure(item)">play_circle_outline</v-icon>
                             <v-icon v-on:click.stop v-if="item.running || item.queued" color="red" @click="StopProcedure(item)">stop</v-icon>
+                            <v-icon right v-on:click.stop v-if="!item.running && !item.queued" color="white" @click="AddAllCharacters(item)">people</v-icon>
                         </template>
                         <draggable v-model="item.characters" :disabled="item.running" @change="CharacterAddedToProcedure" :empty-insert-threshold="50" :options="{group:{name:'tasked_characters'}}" style="min-height: 10px">
                             <v-list-item dense v-for="(char, char_key) in item.characters" :key="char_key">
@@ -668,6 +669,10 @@ export default
         RemoveActiveProcedure(procedure)
         {
             this.active_procedures = this.active_procedures.filter(item => item !== procedure);
+        },
+        AddAllCharacters(procedure)
+        {
+            procedure.characters = this.characters;
         }
     }
 };
