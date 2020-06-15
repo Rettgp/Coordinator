@@ -32,6 +32,7 @@
         <v-flex d-flex xs6 sm6 md7 lg7 fill-height>
             <v-list flat expand :height="windowSize.y - 150">
                 <v-subheader>Active Procedures
+                    <v-icon class="pl-3" v-if="active_procedures.length > 0" color="white" @click="show_save_template = true">save</v-icon>
                     <v-spacer />
                     <v-text-field v-model="loop_count" label="Loop Count" dense outlined :min="0" hide-details type="number" style="width: 100px"></v-text-field>
                 </v-subheader>
@@ -59,6 +60,7 @@
                                 <v-list-item-content>
                                     <v-list-item-subtitle v-text="char.name"> </v-list-item-subtitle>
                                 </v-list-item-content>
+                                <v-icon v-if="!item.running" color="white" @click="RemoveCharacter(item, char.name, $event)" class="pl-2">close</v-icon>
                             </v-list-item>
                         </draggable>
                         <v-divider :key="`${i}-divider`"></v-divider>
@@ -72,6 +74,19 @@
         </v-btn>
     </v-layout>
     <Log ref="LogComponent" />
+    <v-dialog v-model="show_save_template" width="50%">
+        <v-card class="mx-auto" width="100%" raised>
+            <v-list-item one-line>
+                <v-list-item-title class="headline mb-1">Template Name</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+                <v-text-field v-model="save_template_name" label="Name" single-line clearable></v-text-field>
+            </v-list-item>
+            <v-card-actions>
+                <v-btn @click="SaveProcedures()" text>Save</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </v-container>
 </template>
 
@@ -90,6 +105,7 @@ import DataStore from "DataStore";
 import draggable from 'vuedraggable'
 import Character from 'Character';
 import Procedure from 'Procedure';
+import SyncFile from 'SyncFile';
 
 const data_store = new DataStore(
 {
@@ -128,6 +144,8 @@ export default
                 x: 0,
                 y: 0,
             },
+            save_template_name: "",
+            show_save_template: false
         };
     },
 
@@ -137,6 +155,11 @@ export default
         EventBus.$on('procedurePath', (path) =>
         {
             this.PopulateProcedures(path);
+        });
+        EventBus.$on('loadTemplate', (name) =>
+        {
+            console.log("load received");
+            this.LoadTemplate(name);
         });
     },
     created: function ()
@@ -673,6 +696,28 @@ export default
         AddAllCharacters(procedure)
         {
             procedure.characters = this.characters;
+        },
+        SaveProcedures()
+        {
+            let sync_file = new SyncFile(this.save_template_name, this.active_procedures, this.loop_count);
+            sync_file.Save();
+            this.show_save_template = false;
+            EventBus.$emit('saveTemplate', name);
+        },
+        LoadTemplate(name)
+        {
+            console.log("create sync file")
+            let sync_file = new SyncFile(name);
+            sync_file.Load();
+            this.active_procedures = sync_file.procedures;
+            this.loop_count = sync_file.loop_count;
+        },
+        RemoveCharacter(procedure, name)
+        {
+            procedure.characters = procedure.characters.filter((element) =>
+            {
+                return element.name !== name;
+            });
         }
     }
 };

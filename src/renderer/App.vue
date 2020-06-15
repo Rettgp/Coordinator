@@ -11,6 +11,11 @@
                         <v-list-item-title>Procedure Folder</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item v-for="(item, i) in templates" :key="i" @click.stop="LoadTemplate(item)">
+                    <v-list-item-content>
+                        <v-list-item-title>{{item}}</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
 
@@ -48,6 +53,7 @@
 <script>
 import DataStore from "DataStore";
 import EventBus from "EventBus";
+import SyncFile from 'SyncFile';
 
 const data_store = new DataStore(
 {
@@ -71,12 +77,18 @@ export default
             drawer: false,
             show_path_card: null,
             procedure_path: String,
-            app_version: 'V' + require('../../package.json').version
+            app_version: 'V' + require('../../package.json').version,
+            templates: []
         };
     },
     created: function ()
     {
         this.procedure_path = data_store.Get('procedurePath');
+        this.PopulateTemplates();
+        EventBus.$on('saveTemplate', (name) =>
+        {
+            this.PopulateTemplates();
+        });
     },
     methods:
     {
@@ -85,6 +97,31 @@ export default
             data_store.Set('procedurePath', this.procedure_path);
             this.show_path_card = false;
             EventBus.$emit('procedurePath', this.procedure_path);
+        },
+        PopulateTemplates()
+        {
+            const Path = require("path");
+            const Fs = require("fs");
+            const {remote} = require('electron');
+            let app_dir = remote.app.getPath('appData');
+            let normalized_path = Path.normalize(`${app_dir}/coordinator/templates`)
+            if (Fs.existsSync(normalized_path))
+            {
+                let dir = Fs.readdirSync(normalized_path);
+                let files = dir.filter(function (file)
+                {
+                    return file.match(/.*\.(json)/ig);
+                });
+                let file_names = [];
+                files.forEach(element => file_names.push(Path.basename(`${normalized_path}/${element}`, '.json')));
+
+                this.templates = file_names;
+            }
+        },
+        LoadTemplate(name)
+        {
+            EventBus.$emit('loadTemplate', name);
+            console.log("load");
         }
     }
 };
