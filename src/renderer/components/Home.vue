@@ -158,7 +158,6 @@ export default
         });
         EventBus.$on('loadTemplate', (name) =>
         {
-            console.log("load received");
             this.LoadTemplate(name);
         });
     },
@@ -706,9 +705,9 @@ export default
         },
         LoadTemplate(name)
         {
-            console.log("create sync file")
             let sync_file = new SyncFile(name);
             sync_file.Load();
+
             this.active_procedures = sync_file.procedures;
             this.loop_count = sync_file.loop_count;
         },

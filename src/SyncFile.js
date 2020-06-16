@@ -1,3 +1,4 @@
+import Procedure from 'Procedure';
 
 export default class SyncFile
 {
@@ -81,12 +82,14 @@ export default class SyncFile
         let raw = fs.readFileSync(normalized_path);
         let parsed_json = JSON.parse(raw);
 
-        this.procedures = parsed_json.procedures;
-        for (let i = 0; i < this.procedures.length; ++i)
+        for (let i = 0; i < parsed_json.procedures.length; ++i)
         {
-            this.procedures[i].repeat_count = parseInt(this.procedures[i].repeat_count);
-            console.log(this.procedures[i].repeat_count)
+            let file_procedure = parsed_json.procedures[i];
+            let procedure = new Procedure(file_procedure.name);
+            procedure.repeat_count = file_procedure.repeat_count;
+            this.procedures.push(procedure);
         }
+
         this.loop_count = parseInt(parsed_json.loop_count);
     }
 }

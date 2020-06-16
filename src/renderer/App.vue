@@ -121,7 +121,6 @@ export default
         LoadTemplate(name)
         {
             EventBus.$emit('loadTemplate', name);
-            console.log("load");
         }
     }
 };
