@@ -353,6 +353,7 @@ export default
                 if (reported_character_procs >= commanded_procedure.characters.length)
                 {
                     active_character.procs = []
+                    this.$refs.LogComponent.Log(`Collected ${global_procs.size} procs - Distributing...`);
                     while (global_procs.size > 0)
                     {
                         const it = global_procs[Symbol.iterator]();
@@ -389,6 +390,7 @@ export default
                         else
                         {
                             character.socket.write(`procs,${character.procs.join('|')}\n`);
+                            this.$refs.LogComponent.Log(`${character.name} Procs: ${character.procs.join('|')}`);
                         }
                     }
                     reported_character_procs = 0;
