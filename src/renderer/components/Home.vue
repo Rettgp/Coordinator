@@ -696,7 +696,7 @@ export default
         },
         AddAllCharacters(procedure)
         {
-            procedure.characters = this.characters;
+            procedure.characters = Array.from(this.characters);
         },
         SaveProcedures()
         {
