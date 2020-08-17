@@ -263,6 +263,11 @@ export default
                     break;
                 }
             }
+
+            if (data_words.length > 1 && data_words[0] === "!autopath")
+            {
+                this.HandleAutoPath(connection, data_words);
+            }
             if (!commanded_procedure || !active_character)
             {
                 return;
@@ -409,37 +414,6 @@ export default
                 }
 
                 connection.write(`all_characters,${all_characters.join("|")}`);
-            }
-            else if (data_words[0] === "!autopath")
-            {
-                if (data_words.length !== 8)
-                {
-                    this.$refs.LogComponent.Log(`AutoPath: ERROR! - Start and end positions required along with zone`);
-                    return;
-                }
-                let zone = Number(data_words[1]); 
-                let x1 = Number(data_words[2]); 
-                let z1 = Number(data_words[3]);
-                let y1 = Number(data_words[4]); 
-                let x2 = Number(data_words[5]); 
-                let z2 = Number(data_words[6]); 
-                let y2 = Number(data_words[7]);
-                let child = require('child_process')
-                let exec_command = "RecastDemo.exe " + zone + " " +
-                    x1 + " " + -z1 + " " + -y1 + " " +
-                    x2 + " " + -z2 + " " + -y2;
-                    console.log(exec_command);
-                let recast_process = child.exec(exec_command, {cwd: "./RecastDemo/Bin"});
-                recast_process.on('exit', (code) => {
-                    console.log('Child process exited with exit code '+ code);
-
-                    let paths_dir = this.procedures_directory + "/paths"
-                    Fs.copyFile('RecastDemo/Bin/auto_path.lua', paths_dir + "/auto_path.lua", (err) => {
-                        if (err) throw err;
-                        this.$refs.LogComponent.Log(`AutoPath: SUCCESS! - paths/auto_path.lua generated`);
-                    });
-                    connection.write(`autopath,done\n`);
-                });
             }
             else if (data_words[0] === "!local_event")
             {
@@ -653,6 +627,37 @@ export default
         Acknowledge(connection, command, ts)
         {
             connection.write(`rcvd,${command},${ts}\n`);
+        },
+        HandleAutoPath(connection, data_words)
+        {
+            if (data_words.length !== 8)
+            {
+                this.$refs.LogComponent.Log(`AutoPath: ERROR! - Start and end positions required along with zone`);
+                return;
+            }
+            let zone = Number(data_words[1]); 
+            let x1 = Number(data_words[2]); 
+            let z1 = Number(data_words[3]);
+            let y1 = Number(data_words[4]); 
+            let x2 = Number(data_words[5]); 
+            let z2 = Number(data_words[6]); 
+            let y2 = Number(data_words[7]);
+            let child = require('child_process')
+            let exec_command = "RecastDemo.exe " + zone + " " +
+                x1 + " " + -z1 + " " + -y1 + " " +
+                x2 + " " + -z2 + " " + -y2;
+                console.log(exec_command);
+            let recast_process = child.exec(exec_command, {cwd: "./RecastDemo/Bin"});
+            recast_process.on('exit', (code) => {
+                console.log('Child process exited with exit code '+ code);
+
+                let paths_dir = this.procedures_directory + "/paths"
+                Fs.copyFile('RecastDemo/Bin/auto_path.lua', paths_dir + "/auto_path.lua", (err) => {
+                    if (err) throw err;
+                    this.$refs.LogComponent.Log(`AutoPath: SUCCESS! - paths/auto_path.lua generated`);
+                });
+                connection.write(`autopath,done\n`);
+            });
         },
         HandleVoidWatchEvent(procedure_characters, job, elemental, vulnerability)
         {
