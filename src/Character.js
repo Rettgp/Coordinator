@@ -21,6 +21,7 @@ export default class Character
         this.m_main_job = main_job;
         this.m_sub_job = sub_job;
         this.m_procs = [];
+        this.m_empyrean_pop_kis = [];
     }
 
     get name()
@@ -93,6 +94,15 @@ export default class Character
     set sub_job(val)
     {
         this.m_sub_job = val;
+    }
+
+    get empyrean_pop_kis()
+    {
+        return this.m_empyrean_pop_kis;
+    }
+    set empyrean_pop_kis(val)
+    {
+        this.m_empyrean_pop_kis = val;
     }
 
     IsRunning()

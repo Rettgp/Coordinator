@@ -97,7 +97,8 @@ const Path = require("path");
 import Log from "./Log";
 import
 {
-    HintProcs
+    HintProcs,
+    EmpyreanKis
 }
 from 'Constants';
 import EventBus from 'EventBus';
@@ -460,6 +461,82 @@ export default
                             }
                         }
                         break;
+                    }
+                    case "empyrean":
+                    {
+                        if (data_words.length > 1)
+                        {
+                            if (data_words[1] === "collected")
+                            {
+                                if (data_words[2] === "nil")
+                                {
+                                    active_character.empyrean_pop_kis = [];
+                                }
+                                else
+                                {
+                                    let kis = data_words[2].split("|");
+                                    active_character.empyrean_pop_kis = kis;
+                                }
+
+                                this.$refs.LogComponent.Log(`(Empyrean) ${active_character.name} collected: ${data_words[2]}`);
+                                let character_to_pop = null
+                                for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                                {
+                                    let character_can_pop = true;
+                                    for (const [key, value] of EmpyreanKis.entries())
+                                    {
+                                        for (let nm_ki = 0; nm_ki < value.length; ++nm_ki)
+                                        {
+                                            let found = active_character.empyrean_pop_kis.find(element => element === value[nm_ki]);
+                                            if (!found)
+                                            {
+                                                character_can_pop = false;
+                                            }
+                                        }
+
+                                        if (character_can_pop)
+                                        {
+                                            character_to_pop = commanded_procedure.characters[i];
+                                            commanded_procedure.characters[i].socket.write(`local_event,pop,${character_to_pop.name},${key}\n`);
+                                            return
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (data_words[1] === "chest")
+                            {
+                                this.$refs.LogComponent.Log(`(Empyrean) ${active_character.name} doesnt need chest: ${data_words[2]} - ki: ${data_words[3]}`);
+                                let character_to_loot = null
+                                for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                                {
+                                    let character_needs_ki = false;
+                                    for (const [key, value] of EmpyreanKis.entries())
+                                    {
+                                        for (let nm_ki = 0; nm_ki < value.length; ++nm_ki)
+                                        {
+                                            let found = active_character.empyrean_pop_kis.find(element => element === value[nm_ki]);
+                                            if (!found)
+                                            {
+                                                character_needs_ki = true;
+                                            }
+                                        }
+
+                                    }
+                                    
+                                    if (character_needs_ki)
+                                    {
+                                        character_to_loot = commanded_procedure.characters[i];
+                                        break;
+                                    }
+                                }
+
+                                if (character_to_loot)
+                                {
+                                    character_to_loot.socket.write(`local_event,loot,${data_words[2]}\n`);
+                                }
+                            }
+                        }
                     }
                     default:
                     {

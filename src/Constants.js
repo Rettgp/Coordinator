@@ -55,3 +55,8 @@ export let HintProcs = {
         "8": ["522","557","621"],
     }
 }
+
+export let EmpyreanKis = Map[
+    ["Sobek", [1498, 1499, 1500]],
+    ["Cirein-croin", [1504, 1505]]
+]
