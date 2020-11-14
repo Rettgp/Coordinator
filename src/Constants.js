@@ -56,7 +56,7 @@ export let HintProcs = {
     }
 }
 
-export let EmpyreanKis = Map[
+export let EmpyreanKis = new Map([
     ["Sobek", [1498, 1499, 1500]],
     ["Cirein-croin", [1504, 1505]]
-]
+]);

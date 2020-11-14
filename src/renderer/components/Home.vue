@@ -99,8 +99,7 @@ import
 {
     HintProcs,
     EmpyreanKis
-}
-from 'Constants';
+} from 'Constants';
 import EventBus from 'EventBus';
 import DataStore from "DataStore";
 import draggable from 'vuedraggable'
@@ -474,7 +473,7 @@ export default
                                 }
                                 else
                                 {
-                                    let kis = data_words[2].split("|");
+                                    let kis = data_words[2].split("|").map(Number);
                                     active_character.empyrean_pop_kis = kis;
                                 }
 
@@ -482,12 +481,12 @@ export default
                                 let character_to_pop = null
                                 for (let i = 0; i < commanded_procedure.characters.length; ++i)
                                 {
-                                    let character_can_pop = true;
                                     for (const [key, value] of EmpyreanKis.entries())
                                     {
+                                        let character_can_pop = true;
                                         for (let nm_ki = 0; nm_ki < value.length; ++nm_ki)
                                         {
-                                            let found = active_character.empyrean_pop_kis.find(element => element === value[nm_ki]);
+                                            let found = active_character.empyrean_pop_kis.includes(value[nm_ki]);
                                             if (!found)
                                             {
                                                 character_can_pop = false;
@@ -496,10 +495,13 @@ export default
 
                                         if (character_can_pop)
                                         {
+                                            this.$refs.LogComponent.Log(`   ${key} can pop: TRUE`);
                                             character_to_pop = commanded_procedure.characters[i];
                                             commanded_procedure.characters[i].socket.write(`local_event,pop,${character_to_pop.name},${key}\n`);
                                             return
                                         }
+
+                                        this.$refs.LogComponent.Log(`   ${key} can pop: FALSE`);
                                     }
                                 }
                             }
@@ -515,7 +517,7 @@ export default
                                     {
                                         for (let nm_ki = 0; nm_ki < value.length; ++nm_ki)
                                         {
-                                            let found = active_character.empyrean_pop_kis.find(element => element === value[nm_ki]);
+                                            let found = active_character.empyrean_pop_kis.includes(value[nm_ki]);
                                             if (!found)
                                             {
                                                 character_needs_ki = true;
@@ -537,10 +539,12 @@ export default
                                 }
                             }
                         }
+
+                        break;
                     }
                     default:
                     {
-                        this.$refs.LogComponent.Log(`${commanded_procedure.name}: Local Event - Unhandled ${data_words[0]}`);
+                        this.$refs.LogComponent.Log(`${commanded_procedure.name}: Local Event - Unhandled ${data_words[1]}`);
                         break;
                     }
                 }
