@@ -11,6 +11,14 @@
                         <v-list-item-title>Procedure Folder</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item link @click.stop="show_command_card = !show_command_card">
+                    <v-list-item-action>
+                        <v-icon large>input</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Test Command</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
                 <v-list-item v-for="(item, i) in templates" :key="i" @click.stop="LoadTemplate(item)">
                     <v-list-item-content>
                         <v-list-item-title>{{item}}</v-list-item-title>
@@ -43,6 +51,19 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <v-dialog v-model="show_command_card" width="50%">
+            <v-card class="mx-auto" width="100%" raised>
+                <v-list-item three-line>
+                    <v-list-item-title class="headline mb-1">Test Command</v-list-item-title>
+                </v-list-item>
+                <v-list-item>
+                    <v-text-field v-model="test_command" label="local_event,test" :value="test_command" single-line clearable></v-text-field>
+                </v-list-item>
+                <v-card-actions>
+                    <v-btn @click="RunTestCommand()" text>Run</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
         <v-footer app>
             <span>{{app_version}}</span>
         </v-footer>
@@ -60,7 +81,7 @@ const data_store = new DataStore(
     configName: 'user-preferences',
     defaults:
     {
-        procedurePath: "C:/Games/PlayOnline/Windower4/addons/sync/data"
+        procedurePath: "C:/Games/PlayOnline/Windower4/addons/sync/data",
     }
 });
 
@@ -76,7 +97,9 @@ export default
         return {
             drawer: false,
             show_path_card: null,
+            show_command_card: null,
             procedure_path: String,
+            test_command: "",
             app_version: 'V' + require('../../package.json').version,
             templates: []
         };
@@ -97,6 +120,11 @@ export default
             data_store.Set('procedurePath', this.procedure_path);
             this.show_path_card = false;
             EventBus.$emit('procedurePath', this.procedure_path);
+        },
+        RunTestCommand()
+        {
+            this.show_command_card = false;
+            EventBus.$emit('testCommand', this.test_command);
         },
         PopulateTemplates()
         {

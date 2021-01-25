@@ -161,6 +161,10 @@ export default
         {
             this.LoadTemplate(name);
         });
+        EventBus.$on('testCommand', (command) =>
+        {
+            this.RunTestCommand(command);
+        });
     },
     created: function ()
     {
@@ -724,6 +728,7 @@ export default
             let z2 = Number(data_words[6]); 
             let y2 = Number(data_words[7]);
             let child = require('child_process')
+            this.$refs.LogComponent.Log(`AutoPath: Working - generating path for zone: ${zone}`);
             let exec_command = "RecastDemo.exe " + zone + " " +
                 x1 + " " + -z1 + " " + -y1 + " " +
                 x2 + " " + -z2 + " " + -y2;
@@ -838,7 +843,18 @@ export default
             {
                 return element.name !== name;
             });
-        }
+        },
+        RunTestCommand(command)
+        {
+            for (let i = 0; i < this.active_procedures.length; ++i)
+            {
+                let proc_characters = this.active_procedures[i].characters;
+                for (let character of proc_characters)
+                {
+                    character.socket.write(`${command}\n`);
+                }
+            }
+        },
     }
 };
 </script>
