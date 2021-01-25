@@ -741,8 +741,9 @@ export default
                 Fs.copyFile('RecastDemo/Bin/auto_path.lua', paths_dir + "/auto_path.lua", (err) => {
                     if (err) throw err;
                     this.$refs.LogComponent.Log(`AutoPath: SUCCESS! - paths/auto_path.lua generated`);
+                    connection.write(`autopath,done\n`);
+                    Fs.unlinkSync('RecastDemo/Bin/auto_path.lua')
                 });
-                connection.write(`autopath,done\n`);
             });
         },
         HandleVoidWatchEvent(procedure_characters, job, elemental, vulnerability)
