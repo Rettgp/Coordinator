@@ -742,7 +742,6 @@ export default
                     if (err) throw err;
                     this.$refs.LogComponent.Log(`AutoPath: SUCCESS! - paths/auto_path.lua generated`);
                     connection.write(`autopath,done\n`);
-                    Fs.unlinkSync('RecastDemo/Bin/auto_path.lua')
                 });
             });
         },
