@@ -434,6 +434,28 @@ export default
                         break;
                     }
                     case "genkai":
+                    case "genkai2":
+                    case "genkai3":
+                    {
+                        if (data_words.length === 2 && data_words[1] === "testimonyObtained")
+                        {
+                            this.$refs.LogComponent.Log(`Testimony Obtained - Replying`);
+                            for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                            {
+                                commanded_procedure.characters[i].socket.write(`local_event,testimonyObtained\n`);
+                            }
+                        }
+                        if (data_words.length === 2 && data_words[1] === "help")
+                        {
+                            this.$refs.LogComponent.Log(`Genkai 10 - HALP`);
+                            for (let i = 0; i < commanded_procedure.characters.length; ++i)
+                            {
+                                commanded_procedure.characters[i].socket.write(`local_event,help\n`);
+                            }
+                        }
+                        break;
+                    }
+                    case "test":
                     {
                         if (data_words.length === 2 && data_words[1] === "testimonyObtained")
                         {
