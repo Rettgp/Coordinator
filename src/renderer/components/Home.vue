@@ -756,11 +756,12 @@ export default
                 x2 + " " + -z2 + " " + -y2;
                 console.log(exec_command);
             let recast_process = child.exec(exec_command, {cwd: "./RecastDemo/Bin"});
+            let commanded_character = this.characters.find(element => element.socket === connection)
             recast_process.on('exit', (code) => {
                 console.log('Child process exited with exit code '+ code);
 
                 let paths_dir = this.procedures_directory + "/paths"
-                Fs.copyFile('RecastDemo/Bin/auto_path.lua', paths_dir + "/auto_path.lua", (err) => {
+                Fs.copyFile('RecastDemo/Bin/auto_path.lua', paths_dir + `/auto_path_${commanded_character.name}.lua`, (err) => {
                     if (err) throw err;
                     this.$refs.LogComponent.Log(`AutoPath: SUCCESS! - paths/auto_path.lua generated`);
                     connection.write(`autopath,done\n`);
