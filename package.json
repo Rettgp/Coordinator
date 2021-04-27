@@ -26,9 +26,6 @@
     "files": [
       "dist/electron/**/*"
     ],
-    "extraFiles": [
-      "RecastDemo"
-    ],
     "dmg": {
       "contents": [
         {
