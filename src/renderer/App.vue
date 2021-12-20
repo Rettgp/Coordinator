@@ -65,7 +65,7 @@
             </v-card>
         </v-dialog>
         <v-footer app>
-            <span>{{app_version}}</span>
+            <span style="white-space: pre">{{app_version}}   {{auto_updater_status}}</span>
         </v-footer>
     </v-app>
 </div>
@@ -75,6 +75,7 @@
 import DataStore from "DataStore";
 import EventBus from "EventBus";
 import SyncFile from 'SyncFile';
+import {ipcRenderer} from "electron";
 
 const data_store = new DataStore(
 {
@@ -100,7 +101,8 @@ export default
             show_command_card: null,
             procedure_path: String,
             test_command: "",
-            app_version: 'V' + require('../../package.json').version,
+            app_version: 'V' + require('../../package.json').version + "       ",
+            auto_updater_status: '',
             templates: []
         };
     },
@@ -111,6 +113,10 @@ export default
         EventBus.$on('saveTemplate', (name) =>
         {
             this.PopulateTemplates();
+        });
+        ipcRenderer.on("auto-updater-event", (event, args) => 
+        {
+            this.auto_updater_status = args;
         });
     },
     methods:
