@@ -29,6 +29,12 @@
     "extraFiles": [
       "RecastDemo"
     ],
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://gitlab.com"
+      }
+    ],
     "dmg": {
       "contents": [
         {
