@@ -9,7 +9,7 @@ cache:
 
 before_script:
   - npm install -g n
-  - n 10.16.3
+  - n 16.13.1
   - npm install
 
 build:
