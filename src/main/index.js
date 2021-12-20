@@ -16,9 +16,8 @@ autoUpdater.requestHeaders = { "PRIVATE-TOKEN": "glpat-eVURzGFd-5kyda7MbPCg" };
 autoUpdater.autoDownload = true;
 autoUpdater.setFeedURL({
     provider: "generic",
-    url: "http://gitlab.com/api/v4/projects/18471086/jobs/artifacts/master/raw/build?job=deploy"
+    url: "http://gitlab.com/api/v4/projects/18471086/jobs/artifacts/master/raw/build?job=build"
 });
-
 
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
