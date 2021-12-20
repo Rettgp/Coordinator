@@ -66,6 +66,7 @@
         </v-dialog>
         <v-footer app>
             <span style="white-space: pre">{{app_version}}   {{auto_updater_status}}</span>
+            <v-btn v-if="update_available" @click="InstallUpdate()" text>Install</v-btn>
         </v-footer>
     </v-app>
 </div>
@@ -103,6 +104,7 @@ export default
             test_command: "",
             app_version: 'V' + require('../../package.json').version + "       ",
             auto_updater_status: '',
+            update_available: false,
             templates: []
         };
     },
@@ -118,6 +120,10 @@ export default
         {
             this.auto_updater_status = args;
         });
+        ipcRenderer.on("update-available-event", (event, args) => 
+        {
+            this.update_available = true;
+        });
     },
     methods:
     {
@@ -131,6 +137,11 @@ export default
         {
             this.show_command_card = false;
             EventBus.$emit('testCommand', this.test_command);
+        },
+        InstallUpdate()
+        {
+            this.update_available = false;
+            ipcRenderer.send("install-update-event");
         },
         PopulateTemplates()
         {

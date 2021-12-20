@@ -2,6 +2,7 @@
 
 import { app, BrowserWindow } from 'electron'
 import {autoUpdater} from "electron-updater";
+import {ipcMain} from "electron";
 
 /**
  * Set `__static` path to static files in production
@@ -78,18 +79,16 @@ function createWindow()
 
     autoUpdater.on('update-downloaded', function (info)
     {
-        mainWindow.webContents.send("auto-updater-event", 'Update downloaded; will install in 1 seconds');
+        mainWindow.webContents.send("auto-updater-event", 'Update downloaded; ');
+        mainWindow.webContents.send("update-available-event", '');
     });
 
-    autoUpdater.on('update-downloaded', function (info)
-    {
-        setTimeout(function () {
-            autoUpdater.quitAndInstall();
-        }, 1000);
+    ipcMain.on("install-update-event", (event, args) => {
+        autoUpdater.quitAndInstall();
     });
+
     autoUpdater.checkForUpdates();
 }
-
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () =>
