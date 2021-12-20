@@ -17,7 +17,7 @@ build:
   when: manual
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/dist/*.*
+      - $CI_PROJECT_DIR/build/*.*
   script:
     - sed "s/0.0.0/${VERSION_ID}/g" package.json > _package.json && mv _package.json package.json
     - npm run build
