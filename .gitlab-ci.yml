@@ -14,8 +14,8 @@ before_script:
 
 build:
   stage: deploy
-  only:
-    - tags
+  # only:
+  #   - tags
   artifacts:
     paths:
       - $CI_PROJECT_DIR/dist/*.*
