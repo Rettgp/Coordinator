@@ -33,9 +33,24 @@
         </v-app-bar>
 
         <v-content>
-            <v-container class="fill-height" fluid>
-                <router-view />
+            <v-container id="tabs" class="fill-height" fluid>
+                <v-tabs>
+                    <v-tab v-on:click="active_tab=1" v-bind:class="[ active_tab === 1 ? 'active' : '' ]">Runner</v-tab>
+                    <v-tab v-on:click="active_tab=2" v-bind:class="[ active_tab === 2 ? 'active' : '' ]">New Procedure *</v-tab>
+                </v-tabs>
+                <v-content style="padding: 0">
+                    <div v-if="active_tab === 1" class="tabcontent">
+                        <Home/>
+                    </div>
+                    <div v-if="active_tab === 2" class="tabcontent">
+                        <Editor/>
+                    </div>
+                </v-content>
+            
             </v-container>
+            <!-- <v-container class="fill-height" fluid>
+                <router-view />
+            </v-container> -->
         </v-content>
 
         <v-dialog v-model="show_path_card" width="50%">
@@ -73,6 +88,8 @@
 </template>
 
 <script>
+import Home from './components/Home';
+import Editor from './components/Editor';
 import DataStore from "DataStore";
 import EventBus from "EventBus";
 import SyncFile from 'SyncFile';
@@ -90,6 +107,11 @@ const data_store = new DataStore(
 export default
 {
     name: "coordinator",
+    components:
+    {
+        Home,
+        Editor
+    },
     props:
     {
         source: String,
@@ -105,7 +127,8 @@ export default
             app_version: 'V' + require('../../package.json').version + "       ",
             auto_updater_status: '',
             update_available: false,
-            templates: []
+            templates: [],
+            active_tab: 1
         };
     },
     created: function ()
@@ -170,3 +193,6 @@ export default
     }
 };
 </script>
+
+<style scoped>
+</style>

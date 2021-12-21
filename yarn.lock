@@ -3607,6 +3607,11 @@
   "resolved" "https://registry.npmjs.org/dotenv/-/dotenv-9.0.2.tgz"
   "version" "9.0.2"
 
+"draggable-vue-directive@^2.1.0":
+  "integrity" "sha512-LkzZQtql16Fvadesl9pbd3ib6e3fek0FbPfpmLU8a8k6zxrMw+SdSVdPFm4bYVtS3jAcDA/JpXAWts9SMIM7xA=="
+  "resolved" "https://registry.npmjs.org/draggable-vue-directive/-/draggable-vue-directive-2.1.0.tgz"
+  "version" "2.1.0"
+
 "duplexer3@^0.1.4":
   "integrity" "sha1-7gHdHKwO08vH/b6jfcCo8c4ALOI="
   "resolved" "https://registry.npmjs.org/duplexer3/-/duplexer3-0.1.4.tgz"
