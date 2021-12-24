@@ -171,7 +171,6 @@ export default
         SaveTab(tab_index)
         {
             // TODO (Garrett): Need to get content from the tab
-
             let procedure_path = data_store.Get('procedurePath');
             let options = {
                 title: "Save file - Procedure",

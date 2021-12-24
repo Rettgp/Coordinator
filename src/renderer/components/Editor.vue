@@ -7,7 +7,7 @@
                 <v-list-item-group>
 					<v-list-item v-for="(item, i) in blocks" :key="i">
 						<v-list-item-content>
-							<CodeBlock :name="String(i)" :type="item" @drag-ended="OnCodeBlockMoved" @position-changed="OnBlockMoving"/>
+							<CodeBlock :type="item" @drag-ended="OnCodeBlockMoved" @position-changed="OnBlockMoving"/>
 						</v-list-item-content>
 					</v-list-item>
                 </v-list-item-group>
@@ -52,7 +52,7 @@ export default
                 x: 0,
                 y: 0,
             },
-            blocks: ["TestBlock", "TestBlock", "TestBlock"],
+            blocks: ["Run Path", "TestBlock"],
             assigned_blocks: [],
 			code_block_path: [],
 			render_timer: undefined
@@ -229,7 +229,7 @@ export default
 				{
 					propsData: { 
 						name: block.name,
-						type: "TestBlock",
+						type: block.type,
 						assigned: true,
 						boundingRect: {
 							top: parent_rect.top, 

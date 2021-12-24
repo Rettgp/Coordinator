@@ -11,7 +11,7 @@
 		</div>
     </v-expand-transition>
 	<div class="card-content">
-		{{type}} - {{name}}
+		{{type}} {{name}}
 	</div>
 	<v-expand-transition>
 		<div>
