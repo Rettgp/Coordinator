@@ -35,22 +35,27 @@
         <v-content>
             <v-container id="tabs" class="fill-height" fluid>
                 <v-tabs>
-                    <v-tab v-on:click="active_tab=1" v-bind:class="[ active_tab === 1 ? 'active' : '' ]">Runner</v-tab>
-                    <v-tab v-on:click="active_tab=2" v-bind:class="[ active_tab === 2 ? 'active' : '' ]">New Procedure *</v-tab>
+                    <v-tab v-on:click="active_tab=-1" v-bind:class="[ active_tab === -1 ? 'active' : '' ]">
+                        Runner
+                    </v-tab>
+                    <v-tab v-for="(name, i) in procedure_tabs" :key="i" v-on:click="active_tab=i" v-bind:class="[ active_tab === i ? 'active' : '' ]">
+                        {{name}}
+                        <v-btn icon color="white" @click="SaveTab(i)"><font-awesome-icon icon="save" /></v-btn> 
+                        <v-btn icon color="white" @click="CloseTab(i)"><font-awesome-icon icon="times" /></v-btn> 
+                    </v-tab>
+                    <v-btn icon color="white" @click="CreateProcedure()"><font-awesome-icon icon="file-alt" /></v-btn> 
+                    <v-btn icon color="white"><font-awesome-icon icon="folder-open" /></v-btn> 
                 </v-tabs>
                 <v-content style="padding: 0">
-                    <div v-if="active_tab === 1" class="tabcontent">
+                    <div v-show="active_tab === -1" class="tabcontent">
                         <Home/>
                     </div>
-                    <div v-if="active_tab === 2" class="tabcontent">
+                    <div v-for="(name, i) in procedure_tabs" :key="i" v-show="active_tab === i">
                         <Editor/>
                     </div>
                 </v-content>
             
             </v-container>
-            <!-- <v-container class="fill-height" fluid>
-                <router-view />
-            </v-container> -->
         </v-content>
 
         <v-dialog v-model="show_path_card" width="50%">
@@ -128,7 +133,8 @@ export default
             auto_updater_status: '',
             update_available: false,
             templates: [],
-            active_tab: 1
+            procedure_tabs: [],
+            active_tab: -1
         };
     },
     created: function ()
@@ -150,6 +156,15 @@ export default
     },
     methods:
     {
+        CreateProcedure()
+        {
+            let name = `New Procedure *`;
+            this.procedure_tabs.push(name);
+        },
+        CloseTab(tab_index)
+        {
+            this.procedure_tabs.split(tab_index - 1, 1);
+        },
         SaveProcedureFolder()
         {
             data_store.Set('procedurePath', this.procedure_path);
