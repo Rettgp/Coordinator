@@ -98,14 +98,16 @@ import Editor from './components/Editor';
 import DataStore from "DataStore";
 import EventBus from "EventBus";
 import SyncFile from 'SyncFile';
+import CodeBlockFile from 'CodeBlockFile'
 import {ipcRenderer} from "electron";
+window.$ = window.jQuery = require('jquery');
 
 const data_store = new DataStore(
 {
     configName: 'user-preferences',
     defaults:
     {
-        procedurePath: "C:/Games/PlayOnline/Windower4/addons/sync/data",
+        procedurePath: "C:/",
     }
 });
 
@@ -165,6 +167,26 @@ export default
         {
             this.procedure_tabs.splice(tab_index - 1, 1);
             this.active_tab = this.procedure_tabs.length - 1;
+        },
+        SaveTab(tab_index)
+        {
+            // TODO (Garrett): Need to get content from the tab
+
+            let procedure_path = data_store.Get('procedurePath');
+            let options = {
+                title: "Save file - Procedure",
+                defaultPath: procedure_path,
+                buttonLabel : "Save Procedure File",
+                filters :[
+                    {name: 'LUA Script', extensions: ['lua']}
+                ]
+            }
+            const {remote} = require('electron');
+            let file_path = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), options);
+            if (file_path)
+            {
+                CodeBlockFile.WriteFile(file_path, "TODO");
+            }
         },
         SaveProcedureFolder()
         {

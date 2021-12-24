@@ -253,7 +253,7 @@ export default
 };
 </script>
 
-<style scoped>
+<style>
 .v-list {
     min-width: 100px;
     width: 100%;

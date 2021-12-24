@@ -155,4 +155,5 @@ export default
 .theme--dark.v-card {
 	background-color: darksalmon;
 }
+
 </style>
