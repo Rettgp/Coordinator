@@ -2,7 +2,7 @@
 <v-container fluid grid-list-md fill-height>
     <v-layout row wrap v-resize="OnResize">
         <v-flex d-flex xs3 sm3 md2 lg2 fill-height>
-            <v-list flat :height="windowSize.y - 150">
+            <v-list flat :height="windowSize.y - 250">
                 <v-subheader>Characters</v-subheader>
                 <v-list-item-group>
                     <draggable v-model="characters" :options="{group:{name:'tasked_characters', pull:'clone', put:false}}" style="min-height: 10px">
@@ -17,7 +17,7 @@
             </v-list>
         </v-flex>
         <v-flex d-flex xs3 sm3 md3 lg3 fill-height>
-            <v-list flat :height="windowSize.y - 150">
+            <v-list flat :height="windowSize.y - 250">
                 <v-subheader>Procedures</v-subheader>
                 <v-list-item-group>
                     <draggable v-model="procedures" :clone="CloneProcedure" :options="{group:{name:'tasks', pull:'clone', put:false}}" style="min-height: 10px">
@@ -30,7 +30,7 @@
             </v-list>
         </v-flex>
         <v-flex d-flex xs6 sm6 md7 lg7 fill-height>
-            <v-list flat expand :height="windowSize.y - 150">
+            <v-list flat expand :height="windowSize.y - 250">
                 <v-subheader>Active Procedures
                     <v-icon class="pl-3" v-if="active_procedures.length > 0" color="white" @click="show_save_template = true">save</v-icon>
                     <v-spacer />

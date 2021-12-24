@@ -82,6 +82,7 @@ export default
 				this.bottom_link.item.initialPosition = {left: 0, top: 0};
 				this.bottom_link.item.initialPosition.left = rect.x;
 				this.bottom_link.item.initialPosition.top = rect.y + bottom_rect.height;
+				this.bottom_link.OnPositionChanged(position_diff, absolute_position, undefined)
 			}
 
 			this.$emit("position-changed", this, absolute_position, position_diff, event);
@@ -96,9 +97,9 @@ export default
 				setTimeout(() => {
 					this.bottom_link.item.resetInitialPos = false;
 				}, 0);
+				this.bottom_link.OnDragEnd(position_diff, absolute_position, event);
 			}
 
-			console.log("Drag end");
 			if (!this.assigned)
 			{
 				this.item.resetInitialPos = true;

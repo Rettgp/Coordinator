@@ -2,7 +2,7 @@
 <v-container fluid grid-list-md fill-height>
     <v-layout row wrap v-resize="OnResize">
         <v-flex d-flex xs3 sm3 md2 lg2 fill-height>
-            <v-list style="z-index: 1" flat :height="windowSize.y - 150">
+            <v-list style="z-index: 1" flat :height="windowSize.y - 250">
                 <v-subheader>Blocks</v-subheader>
                 <v-list-item-group>
 					<v-list-item v-for="(item, i) in blocks" :key="i">
@@ -14,7 +14,7 @@
             </v-list>
         </v-flex>
         <v-flex d-flex xs9 sm9 md10 lg10 fill-height fill-width>
-            <v-sheet id="codeArea" flat :height="windowSize.y - 150" :width="windowSize.x - 150">
+            <v-sheet id="codeArea" flat :height="windowSize.y - 250" :width="windowSize.x - 150">
 			</v-sheet>
         </v-flex>
     </v-layout>
@@ -29,6 +29,7 @@ import DataStore from "DataStore";
 import draggable from 'vuedraggable'
 import CodeBlock from './CodeBlock';
 import Vue from 'vue'
+import { start } from 'repl';
 var CodeBlockClass = Vue.extend(CodeBlock)
 
 const data_store = new DataStore(
@@ -123,33 +124,49 @@ export default
 
 			}
 
-			// Find the start of the link
+			// Iterate through all constructed code paths
 			let start_block = undefined;
+			let multiple_starts = false;
+
 			for (let check_block of this.assigned_blocks)
 			{
 				if (!check_block.top_link && check_block.bottom_link)
 				{
+					if (start_block !== undefined)
+					{
+						multiple_starts = true;
+					}
 					start_block = check_block;
-					break;
+
+					let sort_index = 0;
+					let block = check_block;
+					while (block)
+					{
+						// Position children under starting block
+						if (block.top_link)
+						{
+							let other_rect = block.top_link.$el.getBoundingClientRect();
+							block.$el.style.top = other_rect.bottom - 5 + "px";
+							block.$el.style.left = other_rect.left + "px";
+						}
+
+						block.$el.style.zIndex = sort_index
+						block = block.bottom_link;
+						sort_index++
+					}
 				}
 			}
 
+			// Singular code path - Construct the code path
 			this.code_block_path = [];
-			let sort_block = start_block;
-			let sort_index = this.assigned_blocks.length;
-			while (sort_block)
+			if (!multiple_starts)
 			{
-				if (sort_block.top_link)
+				let block = start_block;
+				while (block)
 				{
-					let other_rect = sort_block.top_link.$el.getBoundingClientRect();
-					sort_block.$el.style.top = other_rect.bottom - 5 + "px";
-					sort_block.$el.style.left = other_rect.left + "px";
+					this.code_block_path.push(block);
+					block = block.bottom_link;
 				}
-
-				sort_block.$el.style.zIndex = sort_index
-				this.code_block_path.push(sort_block);
-				sort_block = sort_block.bottom_link;
-				sort_index--;
 			}
 		},
 
@@ -173,8 +190,12 @@ export default
 		{
 			if (event && event.ctrlKey)
 			{
-				block.bottom_link = undefined;
-				block.top_link = undefined;
+				// NOTE (Garrett): I'm only breaking the top links... I wonder if this is ok
+				if (block.top_link)
+				{
+					block.top_link.bottom_link = undefined;
+					block.top_link = undefined;
+				}
 			}
 
 			for (let check_block of this.assigned_blocks)
