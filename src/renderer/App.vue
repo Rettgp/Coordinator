@@ -50,7 +50,7 @@
                     <div v-show="active_tab === -1" class="tabcontent">
                         <Home/>
                     </div>
-                    <div v-for="(name, i) in procedure_tabs" :key="i" v-show="active_tab === i">
+                    <div class="tabcontent" v-for="(name, i) in procedure_tabs" :key="i" v-show="active_tab === i">
                         <Editor/>
                     </div>
                 </v-content>
@@ -163,7 +163,8 @@ export default
         },
         CloseTab(tab_index)
         {
-            this.procedure_tabs.split(tab_index - 1, 1);
+            this.procedure_tabs.splice(tab_index - 1, 1);
+            this.active_tab = this.procedure_tabs.length - 1;
         },
         SaveProcedureFolder()
         {

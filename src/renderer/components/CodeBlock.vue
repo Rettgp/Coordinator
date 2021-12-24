@@ -140,7 +140,7 @@ export default
 };
 </script>
 
-<style>
+<style scoped>
 .v-card {
 	position: "revert";
 	display: flex;

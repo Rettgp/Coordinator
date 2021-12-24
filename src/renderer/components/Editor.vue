@@ -14,7 +14,7 @@
             </v-list>
         </v-flex>
         <v-flex d-flex xs9 sm9 md10 lg10 fill-height fill-width>
-            <v-sheet id="codeArea" flat :height="windowSize.y - 250" :width="windowSize.x - 150">
+            <v-sheet class="codeArea" flat :height="windowSize.y - 250" :width="windowSize.x - 150">
 			</v-sheet>
         </v-flex>
     </v-layout>
@@ -24,12 +24,10 @@
 <script>
 const Fs = require("fs");
 const Path = require("path");
-import EventBus from 'EventBus';
 import DataStore from "DataStore";
 import draggable from 'vuedraggable'
 import CodeBlock from './CodeBlock';
 import Vue from 'vue'
-import { start } from 'repl';
 var CodeBlockClass = Vue.extend(CodeBlock)
 
 const data_store = new DataStore(
@@ -218,8 +216,8 @@ export default
 
 		OnCodeBlockMoved(block, absolute_position)
 		{
-			let parent_el = document.getElementById("codeArea");
-			let parent_rect = document.getElementById("codeArea").getBoundingClientRect();
+			let parent_el = this.$el.getElementsByClassName("codeArea")[0];
+			let parent_rect = this.$el.getElementsByClassName("codeArea")[0].getBoundingClientRect();
 
 			if ((absolute_position.top < parent_rect.top || absolute_position.top > parent_rect.bottom) ||
 				(absolute_position.left < parent_rect.left || absolute_position.left > parent_rect.right))
@@ -255,7 +253,7 @@ export default
 };
 </script>
 
-<style>
+<style scoped>
 .v-list {
     min-width: 100px;
     width: 100%;
