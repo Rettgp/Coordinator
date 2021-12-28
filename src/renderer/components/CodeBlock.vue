@@ -12,6 +12,7 @@
     </v-expand-transition>
 	<div class="card-content">
 		{{type}} {{name}}
+		<CodeBlockArguments ref="CodeBlockArguments" :args="args"/>
 	</div>
 	<v-expand-transition>
 		<div>
@@ -28,10 +29,15 @@
 
 <script>
 import { Draggable } from 'draggable-vue-directive'
+import CodeBlockArguments from './CodeBlockArguments';
 
 export default
 {
     name: "codeblock",
+    components:
+    {
+		CodeBlockArguments
+    },
     props:
     {
         name: String,
@@ -45,7 +51,14 @@ export default
 			type: Object,
 			required: false,
 			default: undefined
-		}
+		},
+		args: {
+			type: Array,
+			required: false,
+			default() {
+				return [];
+			}
+		},
     },
 	directives: {
 		Draggable,
@@ -63,7 +76,7 @@ export default
 			bottom_link: undefined,
 			top_link: undefined,
 			hover_bottom_link: false,
-			hover_top_link: false,
+			hover_top_link: false
         };
     },
     created: function () {
@@ -73,6 +86,16 @@ export default
 	},
     methods:
     {
+		Valid()
+		{
+			this.$refs.CodeBlockArguments.Validate();
+			return this.$refs.CodeBlockArguments.valid;
+		},
+		GetArguments()
+		{
+			console.log(this.$refs.CodeBlockArguments.GetArguments());
+			return this.$refs.CodeBlockArguments.GetArguments();
+		},
 		OnPositionChanged(position_diff, absolute_position, event)
 		{
 			if (this.bottom_link)

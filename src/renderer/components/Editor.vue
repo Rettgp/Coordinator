@@ -27,6 +27,8 @@ const Path = require("path");
 import DataStore from "DataStore";
 import draggable from 'vuedraggable'
 import CodeBlock from './CodeBlock';
+import GetCodeBlock from 'CodeBlockString';
+import {GetArguments} from 'CodeBlockArgumentFactory';
 import Vue from 'vue'
 var CodeBlockClass = Vue.extend(CodeBlock)
 
@@ -68,6 +70,41 @@ export default
     },
     methods:
     {
+		ValidateBlocks()
+		{
+			let start_block = undefined;
+			let multiple_starts = false;
+			for (let check_block of this.assigned_blocks)
+			{
+				if (!check_block.top_link && check_block.bottom_link)
+				{
+					if (start_block !== undefined)
+					{
+						multiple_starts = true;
+					}
+					start_block = check_block;
+				}
+			}
+
+			if (!multiple_starts)
+			{
+				let block = start_block;
+				while (block)
+				{
+					if (!block.Valid())
+					{
+						return false;
+					}
+					block = block.bottom_link;
+				}
+			}
+
+			return true;
+		},
+		GetCodePath()
+		{
+			return this.code_block_path;
+		},
 		GetBlockLinks(check_block)
 		{
 			let links = {top: undefined, bottom: undefined};
@@ -162,7 +199,8 @@ export default
 				let block = start_block;
 				while (block)
 				{
-					this.code_block_path.push(block);
+					let code_block = GetCodeBlock(block.type, block.GetArguments());
+					this.code_block_path.push(code_block);
 					block = block.bottom_link;
 				}
 			}
@@ -236,12 +274,14 @@ export default
 							left: parent_rect.left, 
 							right: parent_rect.right, 
 							bottom: parent_rect.bottom,
-						}
+						},
+						args: GetArguments(block.type)
 					}
 				}
 			)
 			new_block.$on("position-changed", this.OnBlockMoving);
 			new_block.$on("drag-ended", this.CheckBlockLinks);
+			new_block.$vuetify = this.$vuetify;
 			new_block.$mount();
 			new_block.$el.className += " assigned-block";
 			new_block.$el.style.top = absolute_position.top + "px";

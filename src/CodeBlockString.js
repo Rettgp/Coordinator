@@ -5,7 +5,17 @@ function RunPathCode(block_args)
 		content: ""
 	}
 
-	block.content = `coordinator.push.poi(common.create_path_poi(${block_args[0]}, ${block_args[1]}, ${block_args[2]}, ${block_args[3]}))`
+	if (block_args.length < 4)
+	{
+		console.error("You need 4 arguments for RunPath");
+	}
+
+	if (block_args[1])
+	{
+		block_args[1] = `L{${block_args[1]}}`;
+	}
+
+	block.content = `coordinator.push.poi(common.create_path_poi('${block_args[0]}', ${block_args[1]}, ${block_args[2]}, '${block_args[3]}'))`
 	return block;
 }
 
@@ -15,7 +25,7 @@ export default function GetCodeBlock(type, block_args)
 	{
 	case "Run Path":
 	{
-		RunPathCode(block_args);
+		return RunPathCode(block_args);
 		break;
 	}
 	case "TestBlock":

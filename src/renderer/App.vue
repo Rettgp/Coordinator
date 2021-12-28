@@ -51,7 +51,7 @@
                         <Home/>
                     </div>
                     <div class="tabcontent" v-for="(name, i) in procedure_tabs" :key="i" v-show="active_tab === i">
-                        <Editor/>
+                        <Editor :ref="'editor' + i"/>
                     </div>
                 </v-content>
             
@@ -170,7 +170,17 @@ export default
         },
         SaveTab(tab_index)
         {
-            // TODO (Garrett): Need to get content from the tab
+            let block_path = this.$refs[`editor${tab_index}`][0].GetCodePath();
+            if (block_path.length === 0)
+            {
+                return;
+            }
+
+            if (!this.$refs[`editor${tab_index}`][0].ValidateBlocks())
+            {
+                return;
+            }
+
             let procedure_path = data_store.Get('procedurePath');
             let options = {
                 title: "Save file - Procedure",
@@ -184,7 +194,7 @@ export default
             let file_path = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), options);
             if (file_path)
             {
-                CodeBlockFile.WriteFile(file_path, "TODO");
+                CodeBlockFile.WriteFile(file_path, block_path);
             }
         },
         SaveProcedureFolder()
