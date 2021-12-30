@@ -3,7 +3,7 @@ let path = require("path");
 const CodeBlockFile = {
 	SetupFunctionString: (content) =>
 	{
-		return `local setup = function()\n${content}\nend\n`;
+		return `local setup = function()\n${content}end\n`;
 	},
 	FileFooter: (procedure_name) =>
 	{
@@ -26,7 +26,7 @@ const CodeBlockFile = {
 					file_headers += `${require}\n`;
 				}
 			}
-			file_contents += `${block.content}\n`
+			file_contents += `\t${block.content}\n`
 		}
 
 		var extension = path.extname(file_path);

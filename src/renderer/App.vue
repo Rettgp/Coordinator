@@ -98,7 +98,7 @@ import Editor from './components/Editor';
 import DataStore from "DataStore";
 import EventBus from "EventBus";
 import SyncFile from 'SyncFile';
-import CodeBlockFile from 'CodeBlockFile'
+import CodeBlockFile from 'codeblocks/CodeBlockFile'
 import {ipcRenderer} from "electron";
 window.$ = window.jQuery = require('jquery');
 

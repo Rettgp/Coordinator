@@ -27,8 +27,8 @@ const Path = require("path");
 import DataStore from "DataStore";
 import draggable from 'vuedraggable'
 import CodeBlock from './CodeBlock';
-import GetCodeBlock from 'CodeBlockString';
-import {GetArguments} from 'CodeBlockArgumentFactory';
+import GetCodeBlock from 'codeblocks/CodeBlockString';
+import {GetArguments} from 'codeblocks/CodeBlockArgumentFactory';
 import Vue from 'vue'
 var CodeBlockClass = Vue.extend(CodeBlock)
 
@@ -54,7 +54,7 @@ export default
                 x: 0,
                 y: 0,
             },
-            blocks: ["Run Path", "TestBlock"],
+            blocks: ["Run Path", "Interact"],
             assigned_blocks: [],
 			code_block_path: [],
 			render_timer: undefined
@@ -128,9 +128,9 @@ export default
 				{
 					boundary_threshold = 10;
 					let top_link = (current_rect.top - boundary_threshold <= other_rect.bottom && 
-						current_rect.top + boundary_threshold >= (other_rect.top - other_rect.height/2));
+						current_rect.top - boundary_threshold >= (other_rect.top + other_rect.height/2));
 					let bottom_link = (current_rect.bottom + boundary_threshold >= other_rect.top && 
-						current_rect.bottom - boundary_threshold <= (other_rect.bottom - other_rect.height/2));
+						current_rect.bottom + boundary_threshold <= (other_rect.bottom - other_rect.height/2));
 					if (!links.bottom)
 					{
 						links.bottom = bottom_link ? assigned_block : undefined;
