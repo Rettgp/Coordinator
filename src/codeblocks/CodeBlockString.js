@@ -70,7 +70,6 @@ function InteractCode(block_args)
 	{
 		block.content += `}`
 	}
-	console.log(responses);
 
 	for (let i = 0; i < responses.length; ++i)
 	{
