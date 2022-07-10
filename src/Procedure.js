@@ -11,6 +11,7 @@ export default class Procedure
         this.m_repeat_count = 1;
         this.m_current_it = this.m_repeat_count;
         this.m_progress = 0;
+        this.m_parameters = [];
     }
 
     get name()
@@ -94,6 +95,15 @@ export default class Procedure
     {
         this.m_characters = val;
     }
+
+    get parameters()
+    {
+        return this.m_parameters;
+    }
+    set parameters(val)
+    {
+        this.m_parameters = val;
+    }
     AddCharacter(character)
     {
         this.m_characters.push(character);
@@ -145,7 +155,12 @@ export default class Procedure
         for (let i = 0; i < this.characters.length; ++i)
         {
             this.characters[i].StartTask()
-            this.characters[i].socket.write(`load,${this.name}\n`);
+            let load_command = `load,${this.name}`
+            for (let parameter of this.parameters)
+            {
+                load_command += `,${parameter.label},${parameter.value}`
+            }
+            this.characters[i].socket.write(`${load_command}\n`);
         }
 
         this.running = true;

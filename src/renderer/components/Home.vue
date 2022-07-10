@@ -36,7 +36,7 @@
                     <v-spacer />
                     <v-text-field v-model="loop_count" label="Loop Count" dense outlined :min="0" hide-details type="number" style="width: 100px"></v-text-field>
                 </v-subheader>
-                <draggable v-model="active_procedures" :empty-insert-threshold="500" :options="{group:'tasks'}">
+                <draggable v-model="active_procedures" @change="GetProcedureParameters($event)" :empty-insert-threshold="500" :options="{group:'tasks'}">
                     <v-list-group v-for="(item, i) in active_procedures" :key="i" v-model="item.selected" no-action>
                         <template v-slot:activator>
                             <v-icon v-if="!item.running" color="white" @click="RemoveActiveProcedure(item, $event)" class="pr-2">cancel</v-icon>
@@ -63,6 +63,9 @@
                                 <v-icon v-if="!item.running" color="white" @click="RemoveCharacter(item, char.name, $event)" class="pl-2">close</v-icon>
                             </v-list-item>
                         </draggable>
+                        <div v-for="(parameter, parameters_key) in item.parameters" :key="parameters_key">
+                            <v-text-field v-model="item.parameters[parameters_key].value" :disabled="item.running" :hint="parameter.label" persistent-hint></v-text-field>
+                        </div>
                         <v-divider :key="`${i}-divider`"></v-divider>
                     </v-list-group>
                 </draggable>
@@ -247,6 +250,11 @@ export default
             if (data_words.length > 1 && data_words[0] === "connection")
             {
                 this.NewConnection(connection, data_words[1], data_words[2], data_words[3]);
+            }
+
+            if (data_words.length > 1 && data_words[0] === "!parameters")
+            {
+                this.PopulateParameters(data_words);
             }
 
             let commanded_procedure = null;
@@ -878,6 +886,37 @@ export default
                 }
             }
         },
+        GetProcedureParameters(event)
+        {
+            if (this.characters.length == 0)
+            {
+                return
+            }
+
+            if (event.added !== undefined)
+            {
+                let proc_name = event.added.element.name
+                this.characters[0].socket.write(`getParameters,${proc_name}\n`);
+            }
+        },
+        PopulateParameters(data)
+        {
+            let procedures_to_populate = this.active_procedures.filter(element => element.name === data[1]);
+            for (let proc of procedures_to_populate)
+            {
+                let parsed_params = [];
+                for (let i = 2; i < data.length - 1; i+=2)
+                {
+                    let val = data[i + 1];
+                    if (val === null || val === undefined || val === "")
+                    {
+                        val = "";
+                    }
+                    parsed_params.push({label: data[i], value: val});
+                }
+                proc.parameters = parsed_params;
+            }
+        }
     }
 };
 </script>
